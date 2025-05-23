@@ -10,5 +10,5 @@ function Chat() {
         </div>
     )
 }
-export default Chat
-// export default PrivateRoutes({ Component: Chat })
+// export default Chat
+export default PrivateRoutes({ Component: Chat })

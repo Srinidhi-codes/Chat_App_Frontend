@@ -10,5 +10,5 @@ function Auth() {
         </div>
     )
 }
-export default Auth
-// export default PrivateRoutes({ Component: Auth });
+// export default Auth
+export default PrivateRoutes({ Component: Auth });

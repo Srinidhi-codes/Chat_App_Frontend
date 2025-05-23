@@ -41,6 +41,7 @@ export default function AuthPage() {
                 }
             });
             setUserInfo(data.login)
+            localStorage.setItem("token", data.login.token);
             toast("Login Success");
             router.push('/chat');
         } catch (error: any) {
@@ -62,7 +63,8 @@ export default function AuthPage() {
                     }
                 }
             });
-            setUserInfo(data.signUp)
+            setUserInfo(data.signUp);
+            localStorage.setItem("token", data.signUp.token);
             toast("SignUp Success");
             router.push('/chat');
         } catch (error: any) {

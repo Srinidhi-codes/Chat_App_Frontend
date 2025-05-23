@@ -24,6 +24,7 @@ function ProfileInfo() {
             const result = await logoutMutation();
             if (result?.data?.logout) {
                 setUserInfo(null);
+                localStorage.setItem("token", "");
                 router.push('/auth');
             }
 

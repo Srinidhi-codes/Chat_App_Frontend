@@ -1,27 +1,29 @@
 'use client'
 
-import { useAppStore } from "@/store"
+import { useAppStore } from "@/store";
 import { usePathname, useRouter } from "next/navigation";
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect } from "react";
 
-export default function PrivateRoutes({ Component }: any) {
-    return function isAuth(props: any) {
+export default function PrivateRoutes({ Component }: { Component: any }) {
+    return function IsAuth(props: any) {
         const { userInfo } = useAppStore();
         const router = useRouter();
         const pathName = usePathname();
 
-        // useLayoutEffect(() => {
-        //     // If user is logged in and tries to access "/", redirect to /chat
-        //     if (userInfo && pathName === '/') {
-        //         router.replace('/chat');
-        //     }
+        useLayoutEffect(() => {
+            const isAuthPage = pathName === "/" || pathName === "/auth";
 
-        //     // If user is not logged in and tries to access any other route
-        //     if (!userInfo && pathName !== '/') {
-        //         router.replace('/');
-        //     }
-        // }, [userInfo, pathName]);
+            if (!userInfo && !isAuthPage) {
+                // 🚫 Not logged in, redirect to /auth
+                router.replace("/auth");
+            }
 
-        // return <Component {...props} />;
+            if (userInfo && isAuthPage) {
+                // ✅ Logged in, redirect away from /auth
+                router.replace("/chat");
+            }
+        }, [userInfo, pathName, router]);
+
+        return <Component {...props} />;
     };
 }
