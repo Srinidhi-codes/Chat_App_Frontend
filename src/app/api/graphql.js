@@ -1,17 +1,22 @@
+// pages/api/graphql.js
 import httpProxy from 'http-proxy';
 
 const proxy = httpProxy.createProxyServer();
 
 export const config = {
     api: {
-        bodyParser: false, // Important: disable Next.js body parsing to let proxy handle raw requests
+        bodyParser: false,  // Important! Let proxy handle the raw body
     },
 };
 
 export default function handler(req, res) {
     return new Promise((resolve, reject) => {
-        // Proxy to your backend
-        proxy.web(req, res, { target: process.env.NEXT_PUBLIC_SOCKET_URL }, (err) => {
+        // Forward the request to your backend
+        proxy.web(req, res, {
+            target: 'https://chat-app-backend-g8as.onrender.com',
+            changeOrigin: true,
+            secure: true,
+        }, (err) => {
             if (err) {
                 console.error('Proxy error:', err);
                 reject(err);
