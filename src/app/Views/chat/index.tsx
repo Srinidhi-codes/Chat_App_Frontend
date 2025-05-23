@@ -14,7 +14,7 @@ export default function ChatPage() {
     useEffect(() => {
         if (!userInfo?.profileSetup) {
             toast('Please first setup profile to continue.')
-            router.push('/profile');
+            // router.push('/profile');
         }
     }, [userInfo, router])
     return (

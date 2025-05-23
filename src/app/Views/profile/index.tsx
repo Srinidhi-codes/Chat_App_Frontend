@@ -119,11 +119,11 @@ export default function ProfilePage() {
     };
 
     const handleNavigate = () => {
-        if (userInfo?.profileSetup) {
-            router.push('/chat');
-        } else {
-            toast.error('Complete profile first to access chat.');
-        }
+        // if (userInfo?.profileSetup) {
+        //     router.push('/chat');
+        // } else {
+        //     toast.error('Complete profile first to access chat.');
+        // }
     };
 
     const handleFile = () => {
