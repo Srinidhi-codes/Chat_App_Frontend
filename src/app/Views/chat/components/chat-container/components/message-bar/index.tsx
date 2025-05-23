@@ -160,44 +160,49 @@ function MessageBar() {
     };
 
     return (
-        <div className='h-[10vh] bg-[#1c1d25] flex justify-center items-center px-8 gap-6'>
-            <div className='flex-1 flex bg-[#2a2b33] rounded-md items-center gap-5 pr-5'>
+        <div className="h-auto min-h-[10vh] bg-[#1c1d25] flex justify-center items-center px-4 py-2 gap-4 md:gap-6">
+            <div className="w-full md:flex-1 flex bg-[#2a2b33] rounded-md items-center gap-3 md:gap-5 pr-3 md:pr-5">
                 <input
-                    placeholder='Enter message here...'
-                    type='text'
+                    placeholder="Enter message here..."
+                    type="text"
                     value={message}
-                    className='flex-1 p-5 bg-transparent rounded-md focus:border-none focus:outline-none'
+                    className="flex-1 p-3 md:p-5 cursor-default bg-transparent rounded-md focus:outline-none text-sm md:text-base min-w-[180px]"
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleSendMessage();
+                            e.preventDefault()
+                            handleSendMessage()
                         }
                     }}
                 />
+
                 <Button
-                    type='button'
+                    type="button"
                     onClick={handleAttachmentClick}
-                    className='text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none'
+                    className="text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none"
                 >
-                    <GrAttachment className='text-2xl' />
+                    <GrAttachment className="text-xl md:text-2xl" />
                 </Button>
                 <input
-                    type='file'
-                    className='hidden'
+                    type="file"
+                    className="hidden"
                     ref={fileInputRef}
                     onChange={handleAttachmentChange}
                 />
-                <div className='relative'>
+
+                <div className="relative">
                     <Button
-                        type='button'
+                        type="button"
                         onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}
-                        className='text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none'
+                        className="text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none"
                     >
-                        <RiEmojiStickerLine className='text-2xl' />
+                        <RiEmojiStickerLine className="text-xl md:text-2xl" />
                     </Button>
                     {emojiPickerOpen && (
-                        <div className='absolute bottom-16 right-0 z-50' ref={emojiRef}>
+                        <div
+                            className="absolute bottom-16 right-0 z-50"
+                            ref={emojiRef}
+                        >
                             <EmojiPicker
                                 theme={'dark' as Theme}
                                 open={emojiPickerOpen}
@@ -208,14 +213,16 @@ function MessageBar() {
                     )}
                 </div>
             </div>
+
             <Button
-                type='button'
+                type="button"
                 onClick={handleSendMessage}
-                className='bg-[#8417ff] rounded-md flex justify-center items-center p-5 hover:bg-[#741bda] focus:bg-[#741bda] outline-none transition-all duration-300'
+                className="bg-[#8417ff] rounded-md flex justify-center items-center p-3 md:p-5 hover:bg-[#741bda] focus:bg-[#741bda] outline-none transition-all duration-300"
             >
-                <IoSend className='text-2xl' />
+                <IoSend className="text-xl md:text-2xl" />
             </Button>
         </div>
+
     );
 }
 

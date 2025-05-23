@@ -37,18 +37,24 @@ const ContactsContainer = () => {
                     <Title text='Direct Messages' />
                     <NewDM />
                 </div>
-                <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full">
+                {directMessagesContacts ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full">
                     <ContactList contacts={directMessagesContacts} />
-                </div>
+                </div> :
+                    <div className="text-center p-2">
+                        Please click on <span className="animate-pulse text-xl px-2 font-bold">+</span> to start chat & socialize
+                    </div>}
             </div>
             <div className="my-5 w-full">
-                <div className="flex items-center justify-center pr-10 gap-5">
+                <div className="flex items-center justify-between pr-10 gap-5">
                     <Title text='Channels' />
                     <CreateChannel />
                 </div>
-                <div className="max-h-[38vh] overflow-y-auto scroll-hidden">
+                {channels ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full">
                     <ContactList contacts={channels} isChannel={true} />
-                </div>
+                </div> :
+                    <div className="text-center p-2">
+                        Please click on <span className="animate-pulse text-xl px-2 font-bold">+</span> to start new Channel
+                    </div>}
             </div>
             <ProfileInfo />
         </div>

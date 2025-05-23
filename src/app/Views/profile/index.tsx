@@ -119,11 +119,11 @@ export default function ProfilePage() {
     };
 
     const handleNavigate = () => {
-        // if (userInfo?.profileSetup) {
-        //     router.push('/chat');
-        // } else {
-        //     toast.error('Complete profile first to access chat.');
-        // }
+        if (!userInfo?.profileSetup) {
+            toast.error('Complete profile first to access chat.');
+        } else {
+            router.push('/chat');
+        }
     };
 
     const handleFile = () => {
@@ -150,51 +150,61 @@ export default function ProfilePage() {
                 <div>
                     <IoArrowBack onClick={handleNavigate} className="text-4xl lg:text-6xl text-white/90 cursor-pointer" />
                 </div>
-                <div className="grid grid-cols-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Avatar Section */}
                     <div
-                        className="h-full w-32 md:w-48 md:h-48 relative flex items-center justify-center"
+                        className="w-full flex justify-center"
                         onMouseEnter={() => setHovered(true)}
                         onMouseLeave={() => setHovered(false)}
                     >
-                        <Avatar className="h-32 w-32 md:w-48 md:h-48 rounded-full overflow-hidden">
-                            {userData.image ? (
-                                <AvatarImage src={userData.image} alt="profile" className="object-cover w-full h-full bg-black" />
-                            ) : (
-                                <div className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl border-[1px] flex items-center justify-center rounded-full ${getColor(selectedColor)}`}>
-                                    {userData.firstName
-                                        ? userData.firstName.charAt(0)
-                                        : userInfo?.email?.charAt(0)}
+                        <div className="relative h-32 w-32 md:h-48 md:w-48 flex items-center justify-center">
+                            <Avatar className="h-32 w-32 md:h-48 md:w-48 rounded-full overflow-hidden">
+                                {userData.image ? (
+                                    <AvatarImage
+                                        src={userData.image}
+                                        alt="profile"
+                                        className="object-cover w-full h-full bg-black"
+                                    />
+                                ) : (
+                                    <div className={`uppercase h-32 w-32 md:h-48 md:w-48 text-4xl md:text-5xl border flex items-center justify-center rounded-full ${getColor(selectedColor)}`}>
+                                        {userData.firstName
+                                            ? userData.firstName.charAt(0)
+                                            : userInfo?.email?.charAt(0)}
+                                    </div>
+                                )}
+                            </Avatar>
+
+                            {hovered && (
+                                <div
+                                    className="absolute inset-0 flex items-center justify-center bg-black/50 ring-fuchsia-50 rounded-full"
+                                    onClick={userData.image ? handleDeleteImage : handleFile}
+                                >
+                                    {userData.image ? (
+                                        <FaTrash className="text-white text-2xl md:text-3xl cursor-pointer" />
+                                    ) : (
+                                        <FaPlus className="text-white text-2xl md:text-3xl cursor-pointer" />
+                                    )}
                                 </div>
                             )}
-                        </Avatar>
-                        {hovered && (
-                            <div
-                                className="absolute inset-0 flex items-center justify-center bg-black/50 ring-fuchsia-50 rounded-full"
-                                onClick={userData.image ? handleDeleteImage : handleFile}
-                            >
-                                {userData.image ? (
-                                    <FaTrash className="text-white text-3xl cursor-pointer" />
-                                ) : (
-                                    <FaPlus className="text-white text-3xl cursor-pointer" />
-                                )}
-                            </div>
-                        )}
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            className="hidden"
-                            onChange={handleImageUpload}
-                            name="profile-image"
-                            accept=".png, .jpg, .jpeg, .svg, .webp"
-                        />
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                className="hidden"
+                                onChange={handleImageUpload}
+                                name="profile-image"
+                                accept=".png, .jpg, .jpeg, .svg, .webp"
+                            />
+                        </div>
                     </div>
-                    <div className="flex min-w-32 md:min-w-64 flex-col gap-5 text-white items-center justify-center">
+
+                    {/* Form Section */}
+                    <div className="w-full flex flex-col gap-4 md:gap-5 text-white items-center justify-center">
                         <Input
                             placeholder="Email"
                             type="email"
                             disabled
                             value={userInfo?.email || ''}
-                            className="rounded-lg p-6 bg-[#8d92b1] border-none w-full"
+                            className="rounded-lg p-4 md:p-6 bg-[#8d92b1] border-none w-full"
                         />
                         <Input
                             placeholder="First Name"
@@ -202,7 +212,7 @@ export default function ProfilePage() {
                             name="firstName"
                             value={userData.firstName}
                             onChange={handleChange}
-                            className="rounded-lg p-6 bg-[#2c2e3b] border-none w-full"
+                            className="rounded-lg p-4 md:p-6 bg-[#2c2e3b] border-none w-full"
                         />
                         <Input
                             placeholder="Last Name"
@@ -210,9 +220,9 @@ export default function ProfilePage() {
                             name="lastName"
                             value={userData.lastName}
                             onChange={handleChange}
-                            className="rounded-lg p-6 bg-[#2c2e3b] border-none w-full"
+                            className="rounded-lg p-4 md:p-6 bg-[#2c2e3b] border-none w-full capitalize"
                         />
-                        <div className="w-full flex gap-5">
+                        <div className="w-full flex gap-4 flex-wrap justify-center md:justify-start">
                             {colors?.map((color, index) => (
                                 <div
                                     key={index}
@@ -223,6 +233,7 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 </div>
+
                 <div className="w-full">
                     <Button
                         className="h-16 w-full bg-purple-700 hover:bg-purple-900 transition-all duration-300"

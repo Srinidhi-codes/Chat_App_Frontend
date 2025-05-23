@@ -76,15 +76,12 @@ export default function AuthPage() {
         <div className='h-[100vh] w-[100vw] flex items-center justify-center'>
             <div className='h-[80vh] bg-white border-white text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:w-[60vw] rounded-3xl grid xl:grid-cols-2'>
                 <div className='flex items-center justify-center flex-col'>
-                    <div className='flex items-center justify-center'>
-                        <h1 className='text-5xl font-bold md:text-6xl'>
-                            Welcome
+                    <div className='flex flex-col items-center justify-center text-center pl-0 md:pl-20'>
+                        <h1 className='text-2xl font-bold md:text-4xl font-serif'>
+                            Welcome to <span className='text-purple-500 text-xl md:text-3xl'>Connectify</span>
                         </h1>
-                        <Image src={'../assets/victory.svg'} alt={"victory emoji"} width={100} height={100} />
+                        <Image className='w-[20rem] h-[20rem]' src={'/assets/logo.png'} alt={"logo"} width={100} height={100} />
                     </div>
-                    <p className='font-medium text-center'>
-                        Fill in the details
-                    </p>
                 </div>
                 <div className='flex items-center justify-center w-full'>
                     <Tabs className='w-3/4' defaultValue='login'>
