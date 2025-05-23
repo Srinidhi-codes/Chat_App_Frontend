@@ -9,7 +9,7 @@ import { SocketProvider } from '@/app/context/socketContext'
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloLink, ApolloProvider } from '@apollo/client';
 
 const httpLink = createHttpLink({
-    uri: 'http://localhost:8080/graphql',
+    uri: `${process.env.NEXT_PUBLIC_SOCKET_URL}/graphql`,
     credentials: 'include',
 });
 
