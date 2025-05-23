@@ -10,5 +10,5 @@ function Profile() {
         </div>
     )
 }
-export default Profile;
-// export default PrivateRoutes({ Component: Profile });
+// export default Profile;
+export default PrivateRoutes({ Component: Profile });
