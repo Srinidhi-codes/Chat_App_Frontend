@@ -6,6 +6,7 @@ import { Toaster } from "sonner"
 import { useAppStore } from '@/store';
 import { SocketProvider } from '@/app/context/socketContext'
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context'
 
 const httpLink = createHttpLink({
     uri: `${process.env.NEXT_PUBLIC_SOCKET_URL}/graphql`,
