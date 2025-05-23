@@ -1,4 +1,3 @@
-// app/api/graphql/route.js
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
