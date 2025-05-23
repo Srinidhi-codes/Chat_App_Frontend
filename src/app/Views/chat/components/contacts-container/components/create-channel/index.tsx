@@ -32,9 +32,14 @@ const poppinsFont = Poppins({
     weight: "400"
 });
 
+type Contact = {
+    value: string;
+    label: string;
+};
+
 function CreateChannel() {
     const [openNewChannelModal, setOpenNewChannelModal] = useState(false);
-    const [selectedContacts, setSelectedContacts] = useState([]);
+    const [selectedContacts, setSelectedContacts] = useState<Contact[]>([]);
     const [channelName, setChannelName] = useState("");
     const [fetchSearchTerm] = useLazyQuery(GET_SEARCH_TERM);
     const [fetchAllContacts] = useLazyQuery(GET_ALL_CONTACTS);
@@ -62,7 +67,7 @@ function CreateChannel() {
                     variables: {
                         input: {
                             name: channelName,
-                            members: selectedContacts.map((contact) => contact.value),
+                            members: selectedContacts.map((contact) => contact?.value),
                         }
                     }
                 });

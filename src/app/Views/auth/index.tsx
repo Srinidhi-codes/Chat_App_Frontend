@@ -43,7 +43,7 @@ export default function AuthPage() {
             setUserInfo(data.login)
             toast("Login Success");
             router.push('/chat');
-        } catch (error) {
+        } catch (error: any) {
             toast(`${error.message}`);
         }
     }
@@ -65,7 +65,7 @@ export default function AuthPage() {
             setUserInfo(data.login)
             toast("SignUp Success");
             router.push('/chat');
-        } catch (error) {
+        } catch (error: any) {
             toast(`SignUp Error, ${error.message}`);
         }
     };

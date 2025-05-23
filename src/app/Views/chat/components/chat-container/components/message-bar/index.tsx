@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { GrAttachment } from 'react-icons/gr';
 import { IoSend } from 'react-icons/io5';
 import { RiEmojiStickerLine } from 'react-icons/ri';
-import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
+import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import { useAppStore } from '@/store';
 import { useSocket } from '@/app/context/socketContext';
 import { CREATE_MESSAGE } from '../../../../graphql/mutation';
@@ -44,7 +44,7 @@ function MessageBar() {
         if (!message.trim()) return;
 
         if (selectedChatType === 'contact') {
-            socket.emit('sendMessage', {
+            socket?.emit('sendMessage', {
                 sender: userInfo?.id,
                 content: message,
                 recipient: selectedChatData.id,
@@ -74,7 +74,7 @@ function MessageBar() {
             const api = `https://api.cloudinary.com/v1_1/${cloudName}/${type}/upload`;
             const res = await axios.post(api, data, {
                 headers: { 'Content-Type': 'multipart/form-data' },
-                onUploadProgress: (progressEvent) => {
+                onUploadProgress: (progressEvent: any) => {
                     const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     setFileUploadProgress(percent);
                 },
@@ -134,7 +134,7 @@ function MessageBar() {
                 },
             });
 
-            socket.emit('sendMessage', {
+            socket?.emit('sendMessage', {
                 sender: userInfo?.id,
                 recipient: selectedChatData.id,
                 messageType,
@@ -199,7 +199,7 @@ function MessageBar() {
                     {emojiPickerOpen && (
                         <div className='absolute bottom-16 right-0 z-50' ref={emojiRef}>
                             <EmojiPicker
-                                theme='dark'
+                                theme={'dark' as Theme}
                                 open={emojiPickerOpen}
                                 onEmojiClick={handleAddEmoji}
                                 autoFocusSearch={false}

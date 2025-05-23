@@ -57,7 +57,7 @@ const ContactsContainer = () => {
 
 export default ContactsContainer
 
-const Title = ({ text }) => {
+const Title = ({ text }: any) => {
     return (
         <h6 className="uppercase tracking-widest text-neutral-400 pl-10 font-light text-sm">
             {text}

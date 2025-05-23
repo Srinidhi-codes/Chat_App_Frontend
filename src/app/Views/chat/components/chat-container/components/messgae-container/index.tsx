@@ -33,7 +33,7 @@ function MessageContainer() {
     }
 
 
-    const downloadFile = async (fileUrl: string) => {
+    const downloadFile = async (fileUrl: any) => {
         try {
             setIsDownloading(true);
             setFileDownloadProgress(0);
@@ -106,7 +106,7 @@ function MessageContainer() {
         }
     }, [selectedChatData, selectedChatType, selectedChatMessages]);
 
-    const renderDMMessages = (message) => {
+    const renderDMMessages = (message: any) => {
         const isSender = message?.senderId === userInfo?.id;
         const messageClass = isSender
             ? 'bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50'
@@ -157,7 +157,7 @@ function MessageContainer() {
 
     const renderMessages = () => {
         let lastDate = '';
-        return selectedChatMessages?.map((message, index) => {
+        return selectedChatMessages?.map((message: any) => {
             const messageDate = moment(message.createdAt).format('YYYY-MM-DD');
             const showDate = messageDate !== lastDate;
             lastDate = messageDate;
