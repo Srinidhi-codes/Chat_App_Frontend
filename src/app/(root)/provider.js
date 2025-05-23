@@ -1,5 +1,6 @@
 'use client'
 
+// import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client"
 import { useEffect } from "react";
 import { Toaster } from "sonner"
 import { useAppStore } from '@/store';
@@ -7,7 +8,7 @@ import { SocketProvider } from '@/app/context/socketContext'
 import { ApolloClient, InMemoryCache, createHttpLink, ApolloProvider } from '@apollo/client';
 
 const httpLink = createHttpLink({
-    uri: '/api/graphql',
+    uri: `${process.env.NEXT_PUBLIC_SOCKET_URL}/graphql`,
     credentials: 'include',
 });
 
