@@ -62,7 +62,7 @@ export default function AuthPage() {
                     }
                 }
             });
-            setUserInfo(data.login)
+            setUserInfo(data.signUp)
             toast("SignUp Success");
             router.push('/chat');
         } catch (error: any) {
