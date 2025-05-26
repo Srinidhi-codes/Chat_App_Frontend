@@ -151,7 +151,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="bg-[#353746] h-[100vh] flex items-center justify-center flex-col gap-10">
+        <div className="bg-[#353746] md:h-[100vh] h-[100dvh] flex items-center justify-center flex-col gap-10">
             <div className="flex flex-col gap-10 w-[80vw] md:w-max">
                 <div>
                     <IoArrowBack onClick={handleNavigate} className="text-2xl lg:text-6xl text-white/90 cursor-pointer hover:-translate-x-5 duration-300 transition-all" />
