@@ -15,7 +15,7 @@ import io from 'socket.io-client';
 import { toast } from 'sonner';
 import ContextEditMenu from '@/components/ContextEditMenu';
 
-const socket = io('http://localhost:8080', { transports: ['websocket'] });
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ['websocket'] });
 
 function MessageContainer() {
     const {

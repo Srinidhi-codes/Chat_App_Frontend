@@ -26,7 +26,7 @@ function MessageBar() {
         setIsUploading,
         setFileUploadProgress,
     } = useAppStore();
-    const socket = io('http://localhost:8080', { transports: ['websocket'] });
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ['websocket'] });
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [createMessage] = useMutation(CREATE_MESSAGE);
     const [updateMessage] = useMutation(UPDATE_MESSAGE);
