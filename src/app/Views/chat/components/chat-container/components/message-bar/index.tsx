@@ -11,6 +11,8 @@ import { CREATE_MESSAGE, UPDATE_MESSAGE } from '../../../../graphql/mutation';
 import { useMutation } from '@apollo/client';
 import axios from 'axios';
 import { toast } from 'sonner';
+import io from 'socket.io-client';
+
 
 function MessageBar() {
     const [message, setMessage] = useState('');
@@ -24,7 +26,7 @@ function MessageBar() {
         setIsUploading,
         setFileUploadProgress,
     } = useAppStore();
-    const socket = useSocket();
+    const socket = io('http://localhost:8080', { transports: ['websocket'] });
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [createMessage] = useMutation(CREATE_MESSAGE);
     const [updateMessage] = useMutation(UPDATE_MESSAGE);
