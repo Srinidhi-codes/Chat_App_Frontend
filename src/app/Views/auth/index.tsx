@@ -73,7 +73,7 @@ export default function AuthPage() {
     };
 
     return (
-        <div className='md:h-[100vh] h-[100dvh] w-[100vw] flex items-center justify-center'>
+        <div className='md:h-[100vh] h-[100dvh] md:w-[100vw] w-[100dvw]  flex items-center justify-center'>
             <div className='h-auto py-6 bg-white border-white text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:w-[60vw] rounded-3xl grid xl:grid-cols-2'>
                 <div className='flex items-center justify-center flex-col'>
                     <div className='flex flex-col items-center justify-center text-center pl-0 md:pl-20'>
