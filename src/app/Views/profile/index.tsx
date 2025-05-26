@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function ProfilePage() {
-    const { userInfo, setUserInfo } = useAppStore();
+    const { userInfo, setUserInfo, isOtherProfile, otherProfileData, setIsOtherProfile, } = useAppStore();
     const router = useRouter();
 
     const [userData, setUserData] = useState({
@@ -31,17 +31,25 @@ export default function ProfilePage() {
     const [fetchUserData, { data: fetchedData }] = useLazyQuery(GET_USER_INFO);
 
     useEffect(() => {
-        if (!userInfo) {
-            fetchUserData();
-        } else {
+        if (isOtherProfile && otherProfileData) {
+            setUserData({
+                firstName: otherProfileData.firstName || '',
+                lastName: otherProfileData.lastName || '',
+                image: otherProfileData.image || null,
+            });
+            setSelectedColor(otherProfileData.color || 0);
+        } else if (userInfo) {
             setUserData({
                 firstName: userInfo.firstName || '',
                 lastName: userInfo.lastName || '',
                 image: userInfo.image || null,
             });
             setSelectedColor(userInfo.color || 0);
+        } else {
+            fetchUserData(); // Only fetch when no userInfo is available
         }
-    }, [userInfo]);
+    }, [isOtherProfile, otherProfileData, userInfo]);
+
 
     useEffect(() => {
         if (fetchedData?.getUserInfo) {
@@ -119,12 +127,10 @@ export default function ProfilePage() {
     };
 
     const handleNavigate = () => {
-        if (!userInfo?.profileSetup) {
-            toast.error('Complete profile first to access chat.');
-        } else {
-            router.push('/chat');
-        }
+        setIsOtherProfile(false);
+        router.push('/chat');
     };
+
 
     const handleFile = () => {
         fileInputRef.current?.click();
@@ -148,9 +154,9 @@ export default function ProfilePage() {
         <div className="bg-[#353746] h-[100vh] flex items-center justify-center flex-col gap-10">
             <div className="flex flex-col gap-10 w-[80vw] md:w-max">
                 <div>
-                    <IoArrowBack onClick={handleNavigate} className="text-4xl lg:text-6xl text-white/90 cursor-pointer" />
+                    <IoArrowBack onClick={handleNavigate} className="text-2xl lg:text-6xl text-white/90 cursor-pointer hover:-translate-x-5 duration-300 transition-all" />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
                     {/* Avatar Section */}
                     <div
                         className="w-full flex justify-center"
@@ -174,7 +180,7 @@ export default function ProfilePage() {
                                 )}
                             </Avatar>
 
-                            {hovered && (
+                            {hovered && !isOtherProfile && (
                                 <div
                                     className="absolute inset-0 flex items-center justify-center bg-black/50 ring-fuchsia-50 rounded-full"
                                     onClick={userData.image ? handleDeleteImage : handleFile}
@@ -182,7 +188,7 @@ export default function ProfilePage() {
                                     {userData.image ? (
                                         <FaTrash className="text-white text-2xl md:text-3xl cursor-pointer" />
                                     ) : (
-                                        <FaPlus className="text-white text-2xl md:text-3xl cursor-pointer" />
+                                        <FaPlus className="text-white text-2xl md:text-3xl cursor-pointer hover:rotate-90 duration-300 transition-all" />
                                     )}
                                 </div>
                             )}
@@ -198,12 +204,13 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Form Section */}
-                    <div className="w-full flex flex-col gap-4 md:gap-5 text-white items-center justify-center">
+                    <div className="w-[15rem] flex flex-col gap-4 md:gap-5 text-white items-center justify-center">
                         <Input
                             placeholder="Email"
                             type="email"
                             disabled
                             value={userInfo?.email || ''}
+                            readOnly={isOtherProfile}
                             className="rounded-lg p-4 md:p-6 bg-[#8d92b1] border-none w-full"
                         />
                         <Input
@@ -211,6 +218,7 @@ export default function ProfilePage() {
                             type="text"
                             name="firstName"
                             value={userData.firstName}
+                            readOnly={isOtherProfile}
                             onChange={handleChange}
                             className="rounded-lg p-4 md:p-6 bg-[#2c2e3b] border-none w-full"
                         />
@@ -219,10 +227,11 @@ export default function ProfilePage() {
                             type="text"
                             name="lastName"
                             value={userData.lastName}
+                            readOnly={isOtherProfile}
                             onChange={handleChange}
                             className="rounded-lg p-4 md:p-6 bg-[#2c2e3b] border-none w-full capitalize"
                         />
-                        <div className="w-full flex gap-4 flex-wrap justify-center md:justify-start">
+                        {!isOtherProfile && <div className="w-full flex gap-4 flex-wrap justify-center md:justify-start">
                             {colors?.map((color, index) => (
                                 <div
                                     key={index}
@@ -230,18 +239,18 @@ export default function ProfilePage() {
                                     onClick={() => setSelectedColor(index)}
                                 />
                             ))}
-                        </div>
+                        </div>}
                     </div>
                 </div>
 
-                <div className="w-full">
+                {!isOtherProfile && (
                     <Button
                         className="h-16 w-full bg-purple-700 hover:bg-purple-900 transition-all duration-300"
                         onClick={saveChanges}
                     >
                         Save Changes
                     </Button>
-                </div>
+                )}
             </div>
         </div>
     );

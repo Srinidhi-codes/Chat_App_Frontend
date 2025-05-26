@@ -37,19 +37,18 @@ function NewDM() {
     const [fetchSearchTerm, { data: fetchedData }] = useLazyQuery(GET_SEARCH_TERM);
     const { setSelectedChatType, setSelectedChatData } = useAppStore();
     const searchContacts = async (searchTerm: any) => {
-        // Trigger the lazy query with the search term as a variable
         if (searchTerm.trim() !== '') {
             try {
                 const { data } = await fetchSearchTerm({
                     variables: { searchTerm }
                 });
-                setSearchedContacts(data.searchContact || []); // Update the state with fetched data
+                setSearchedContacts(data.searchContact || []);
             } catch (err) {
                 console.error('Error fetching contacts:', err);
-                setSearchedContacts([]); // Clear the contacts in case of error
+                setSearchedContacts([]);
             }
         } else {
-            setSearchedContacts([]); // Clear the contacts if the search term is empty
+            setSearchedContacts([]);
         }
     };
 

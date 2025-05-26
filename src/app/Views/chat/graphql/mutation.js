@@ -11,3 +11,13 @@ mutation CreateMessage($input: CreateMessageInput!) {
     messageType
   }
 }`;
+
+export const UPDATE_MESSAGE = gql`
+  mutation UpdateMessage($input: UpdateMessageInput!) {
+    updateMessage(input: $input) {
+      id
+      content
+      edited
+    }
+  }
+`;

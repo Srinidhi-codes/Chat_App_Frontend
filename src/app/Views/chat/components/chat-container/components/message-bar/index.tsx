@@ -7,7 +7,7 @@ import { RiEmojiStickerLine } from 'react-icons/ri';
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import { useAppStore } from '@/store';
 import { useSocket } from '@/app/context/socketContext';
-import { CREATE_MESSAGE } from '../../../../graphql/mutation';
+import { CREATE_MESSAGE, UPDATE_MESSAGE } from '../../../../graphql/mutation';
 import { useMutation } from '@apollo/client';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -16,6 +16,7 @@ function MessageBar() {
     const [message, setMessage] = useState('');
     const emojiRef = useRef<HTMLDivElement | null>(null);
     const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
+    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
     const {
         selectedChatType,
         selectedChatData,
@@ -26,6 +27,7 @@ function MessageBar() {
     const socket = useSocket();
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [createMessage] = useMutation(CREATE_MESSAGE);
+    const [updateMessage] = useMutation(UPDATE_MESSAGE);
     const [isUploadingLocal, setIsUploadingLocal] = useState(false); // Local lock
 
     useEffect(() => {
@@ -43,18 +45,58 @@ function MessageBar() {
     const handleSendMessage = async () => {
         if (!message.trim()) return;
 
-        if (selectedChatType === 'contact') {
-            socket?.emit('sendMessage', {
-                sender: userInfo?.id,
-                content: message,
-                recipient: selectedChatData.id,
-                messageType: 'text',
-                fileUrl: undefined,
-            });
-        }
+        try {
+            if (editingMessageId) {
+                // Update existing message
+                await updateMessage({
+                    variables: {
+                        input: {
+                            id: editingMessageId,
+                            content: message,
+                            edited: true,
+                        },
+                    },
+                });
 
-        setMessage('');
+                socket?.emit('updateMessage', {
+                    id: editingMessageId,
+                    content: message,
+                    edited: true,
+                });
+
+                toast.success('Message updated');
+                setEditingMessageId(null); // Reset editing state
+            } else {
+                // Create new message
+                if (selectedChatType === 'contact') {
+                    socket?.emit('sendMessage', {
+                        sender: userInfo?.id,
+                        recipient: selectedChatData.id,
+                        content: message,
+                        messageType: 'text',
+                        fileUrl: undefined,
+                    });
+
+                    await createMessage({
+                        variables: {
+                            input: {
+                                senderId: userInfo?.id,
+                                recipientId: selectedChatData.id,
+                                content: message,
+                                messageType: 'text',
+                            },
+                        },
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Failed to send/update message:', err);
+            toast.error('Something went wrong');
+        } finally {
+            setMessage('');
+        }
     };
+
 
     const handleAddEmoji = (emoji: EmojiClickData) => {
         setMessage((msg) => msg + emoji.emoji);
@@ -159,9 +201,29 @@ function MessageBar() {
         }
     };
 
+    const handleEditMessage = (msgId: string, currentText: string) => {
+        setEditingMessageId(msgId);
+        setMessage(currentText);
+    };
+
+
     return (
         <div className="h-auto min-h-[10vh] bg-[#1c1d25] flex justify-center items-center px-4 py-2 gap-4 md:gap-6">
             <div className="w-full md:flex-1 flex bg-[#2a2b33] rounded-md items-center gap-3 md:gap-5 pr-3 md:pr-5">
+                {editingMessageId && (
+                    <div className="text-xs text-gray-400 italic px-3 pt-2 flex justify-between items-center">
+                        <span>Editing message...</span>
+                        <button
+                            onClick={() => {
+                                setEditingMessageId(null);
+                                setMessage('');
+                            }}
+                            className="text-blue-400 underline text-xs"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )}
                 <input
                     placeholder="Enter message here..."
                     type="text"

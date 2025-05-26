@@ -38,7 +38,7 @@ const ContactsContainer = () => {
                     <NewDM />
                 </div>
                 {directMessagesContacts ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full">
-                    <ContactList contacts={directMessagesContacts} />
+                    <ContactList isChannel={false} />
                 </div> :
                     <div className="text-center p-2">
                         Please click on <span className="animate-pulse text-xl px-2 font-bold">+</span> to start chat & socialize
@@ -50,7 +50,7 @@ const ContactsContainer = () => {
                     <CreateChannel />
                 </div>
                 {channels ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full">
-                    <ContactList contacts={channels} isChannel={true} />
+                    <ContactList isChannel={true} />
                 </div> :
                     <div className="text-center p-2">
                         Please click on <span className="animate-pulse text-xl px-2 font-bold">+</span> to start new Channel

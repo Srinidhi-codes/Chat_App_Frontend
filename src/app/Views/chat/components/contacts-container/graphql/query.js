@@ -69,3 +69,17 @@ export const GET_USER_CHANNELS = gql`
     }
   }
 `;
+
+export const GET_SEARCH_CHANNELS = gql`
+  query SearchChannel($searchTerm: String!) {
+    searchChannel(input: { searchTerm: $searchTerm }) {
+      id
+      name
+      members {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+`;

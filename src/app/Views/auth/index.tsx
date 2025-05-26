@@ -74,13 +74,13 @@ export default function AuthPage() {
 
     return (
         <div className='h-[100vh] w-[100vw] flex items-center justify-center'>
-            <div className='h-[80vh] bg-white border-white text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:w-[60vw] rounded-3xl grid xl:grid-cols-2'>
+            <div className='h-auto py-6 bg-white border-white text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:w-[60vw] rounded-3xl grid xl:grid-cols-2'>
                 <div className='flex items-center justify-center flex-col'>
                     <div className='flex flex-col items-center justify-center text-center pl-0 md:pl-20'>
                         <h1 className='text-2xl font-bold md:text-4xl font-serif'>
                             Welcome to <span className='text-purple-500 text-xl md:text-3xl'>Connectify</span>
                         </h1>
-                        <Image className='w-[20rem] h-[20rem]' src={'/assets/logo.png'} alt={"logo"} width={100} height={100} />
+                        <Image className='w-[15rem] h-[15rem]' src={'/assets/logo.png'} alt={"logo"} width={80} height={100} />
                     </div>
                 </div>
                 <div className='flex items-center justify-center w-full'>

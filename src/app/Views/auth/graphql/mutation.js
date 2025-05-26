@@ -21,6 +21,7 @@ mutation Login($input: LoginInput!) {
     lastName
     profileSetup
     color
+    image
   }
 }
 `;

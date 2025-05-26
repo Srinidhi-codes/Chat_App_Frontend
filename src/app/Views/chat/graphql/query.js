@@ -9,6 +9,7 @@ export const GET_MESSAGES = gql`
       fileUrl
       createdAt
       senderId
+      edited
       recipientId
     }
   }

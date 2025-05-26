@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/tooltip"
 import { FaEdit } from 'react-icons/fa'
 import { useRouter } from 'next/navigation'
-import { IoPowerSharp } from 'react-icons/io5'
+import { LuLogOut } from "react-icons/lu";
 import { useMutation } from '@apollo/client'
 import { LOGOUT_MUTATION } from '../../graphql/mutation'
 
@@ -34,7 +34,7 @@ function ProfileInfo() {
     }
     return (
         <div className='absolute bottom-0 h-16 flex items-center justify-between px-10 w-full bg-[#2a2b33]'>
-            <div className="flex gap-3 items-center justify-center">
+            <div className="flex gap-5 items-center justify-center cursor-pointer" onClick={() => router.push('/profile')}>
                 <div className='w-12 h-12 relative'>
                     <Avatar className="h-12 w-12 rounded-full overflow-hidden">
                         {userInfo?.image ? (
@@ -48,22 +48,14 @@ function ProfileInfo() {
                         )}
                     </Avatar>
                 </div>
-            </div>
-            <div>
-                {userInfo?.firstName && userInfo?.lastName ? `${userInfo?.firstName} ${userInfo?.lastName}` : ""}
+                <div className='transition-transform duration-200 hover:translate-y-[3px]'>
+                    {userInfo?.firstName && userInfo?.lastName ? `${userInfo?.firstName} ${userInfo?.lastName}` : ""}
+                </div>
             </div>
             <div className="flex gap-5">
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger><FaEdit className='text-purple-500 cursor-pointer text-xl font-medium' onClick={() => router.push('/profile')} /></TooltipTrigger>
-                        <TooltipContent className='bg-[#1c1b1e] border-none text-white'>
-                            Edit Profile
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger><IoPowerSharp className='text-red-500 cursor-pointer text-xl font-medium' onClick={logout} /></TooltipTrigger>
+                        <TooltipTrigger><LuLogOut className='cursor-pointer text-xl font-medium text-white transition-transform duration-200 hover:translate-x-1 hover:text-red-500' onClick={logout} /></TooltipTrigger>
                         <TooltipContent className='bg-[#1c1b1e] border-none text-white'>
                             Logout
                         </TooltipContent>

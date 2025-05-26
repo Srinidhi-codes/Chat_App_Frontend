@@ -6,21 +6,26 @@ import { io, Socket } from 'socket.io-client';
 
 const HOST = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:8080';
 
-// Define the SocketContext with proper type
-const SocketContext = createContext < Socket | null > (null);
+interface SocketContextValue {
+    socket: Socket | null;
+    onlineUsers: string[];
+}
 
-// Custom hook to access the socket context
+const SocketContext = createContext<SocketContextValue>({
+    socket: null,
+    onlineUsers: [],
+});
+
 export const useSocket = () => useContext(SocketContext);
 
-// Define props for the provider
 interface SocketProviderProps {
     children: ReactNode;
 }
 
 export const SocketProvider = ({ children }: SocketProviderProps) => {
-    const socketRef = useRef < Socket | null > (null);
-    const [socketInstance, setSocketInstance] = useState < Socket | null > (null);
-    const { userInfo } = useAppStore();
+    const socketRef = useRef<Socket | null>(null);
+    const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+    const userInfo = useAppStore((state) => state.userInfo);
 
     useEffect(() => {
         if (userInfo) {
@@ -30,7 +35,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
             });
 
             const socket = socketRef.current;
-            setSocketInstance(socket);
 
             socket.on('connect', () => {
                 console.log('✅ Connected to socket server');
@@ -40,6 +44,24 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 console.log('⚠️ Disconnected from socket server');
             });
 
+            // Initial online users
+            socket.on('onlineUsers', (users: string[]) => {
+                setOnlineUsers(users);
+            });
+
+            // When a new user comes online
+            socket.on('userOnline', (userId: string) => {
+                setOnlineUsers((prev) =>
+                    prev.includes(userId) ? prev : [...prev, userId]
+                );
+            });
+
+            // When a user goes offline
+            socket.on('userOffline', (userId: string) => {
+                setOnlineUsers((prev) => prev.filter((id) => id !== userId));
+            });
+
+            // Message handlers
             const handleReceiveMessage = (message: any) => {
                 const { selectedChatData, selectedChatType, addMessage } = useAppStore.getState();
 
@@ -52,23 +74,41 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 }
             };
 
+            const handleEditMessage = (updatedMessage: any) => {
+                const { selectedChatMessages, setSelectedChatMessages } = useAppStore.getState();
+
+                if (Array.isArray(selectedChatMessages)) {
+                    const updatedMessages = selectedChatMessages.map((msg) =>
+                        msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
+                    );
+                    setSelectedChatMessages(updatedMessages);
+                } else {
+                    console.warn("selectedChatMessages was not an array, skipping update.");
+                }
+            };
+
             socket.on('receiveMessage', handleReceiveMessage);
+            socket.on('messageEdited', handleEditMessage);
 
             return () => {
                 socket.off('receiveMessage', handleReceiveMessage);
+                socket.off('messageEdited', handleEditMessage);
+                socket.off('onlineUsers');
+                socket.off('userOnline');
+                socket.off('userOffline');
                 socket.disconnect();
             };
         } else {
             if (socketRef.current) {
                 socketRef.current.disconnect();
                 socketRef.current = null;
-                setSocketInstance(null);
+                setOnlineUsers([]);
             }
         }
     }, [userInfo]);
 
     return (
-        <SocketContext.Provider value={socketRef.current}>
+        <SocketContext.Provider value={{ socket: socketRef.current, onlineUsers }}>
             {children}
         </SocketContext.Provider>
     );
