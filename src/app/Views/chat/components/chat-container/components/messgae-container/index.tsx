@@ -215,7 +215,8 @@ function MessageContainer() {
                 ) : (
                     <>
                         {message.messageType === 'text' && (
-                            <div className={`border inline-block p-4 max-w-[50%] break-words rounded-xs ${messageClass}`}>
+                            <div className={`border inline-block p-4 max-w-[50%] break-words rounded-xs ${messageClass} noselect`}
+                                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                                 {message.content}
                             </div>
                         )}
