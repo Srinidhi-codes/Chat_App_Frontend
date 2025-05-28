@@ -84,6 +84,18 @@ function MessageContainer() {
         }
     };
 
+    const isNearBottom = () => {
+        const container = document.querySelector('.scrollbar-hidden');
+        return container ? (container.scrollHeight - container.scrollTop - container.clientHeight < 100) : true;
+    };
+
+    useEffect(() => {
+        if (isNearBottom()) {
+            scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [selectedChatMessages]);
+
+
     useEffect(() => {
         if (fetchedMessages?.getMessage) {
             setSelectedChatMessages(fetchedMessages.getMessage);
@@ -113,26 +125,26 @@ function MessageContainer() {
             toast.warning('You can only edit messages within 5 minutes of sending.');
             return;
         }
-
         setEditingMessageId(id);
         setEditingMessageText(content);
     };
 
     const handleSaveEditedMessage = async (messageId: string) => {
         try {
-            await updateMessage({
-                variables: {
-                    input: {
-                        id: messageId,
-                        content: editingMessageText,
-                        edited: true,
-                    }
-                }
-            });
+            // await updateMessage({
+            //     variables: {
+            //         input: {
+            //             id: messageId,
+            //             content: editingMessageText,
+            //             edited: true,
+            //         }
+            //     }
+            // });
 
             socket.emit('editMessage', {
                 id: messageId,
                 content: editingMessageText,
+                edited: true
             });
 
             setEditingMessageId(null);

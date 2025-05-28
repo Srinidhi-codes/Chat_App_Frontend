@@ -9,10 +9,12 @@ import { LOG_IN, SIGN_UP } from './graphql/mutation'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner';
 import { useAppStore } from '@/store'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function AuthPage() {
     const router = useRouter();
     const { setUserInfo } = useAppStore();
+    const [passwordVisible, setPasswordVisible] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -23,6 +25,9 @@ export default function AuthPage() {
 
     const handleChange = async (e: { target: { name: any; value: any } }) => {
         const { name, value } = e.target;
+        if (name === 'password') {
+            setPasswordVisible(true);
+        }
         setFormData((prevData) => ({
             ...prevData,
             [name]: value
@@ -73,7 +78,7 @@ export default function AuthPage() {
     };
 
     return (
-        <div className='md:h-[100vh] h-[100dvh] md:w-[100vw] w-[100dvw]  flex items-center justify-center'>
+        <div className='md:h-[100vh] h-[100dvh] md:w-[100vw] w-[100dvw] flex items-center justify-center'>
             <div className='h-auto py-6 bg-white border-white text-opacity-90 shadow-2xl w-[80vw] md:w-[90vw] lg:w-[70vw] xl:w-[60vw] rounded-3xl grid xl:grid-cols-2'>
                 <div className='flex items-center justify-center flex-col'>
                     <div className='flex flex-col items-center justify-center text-center pl-0 md:pl-20'>
@@ -89,16 +94,18 @@ export default function AuthPage() {
                             <TabsTrigger value='login' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Login</TabsTrigger>
                             <TabsTrigger value='signup' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Signup</TabsTrigger>
                         </TabsList>
-                        <TabsContent value='login' className='flex flex-col gap-5'>
+                        <TabsContent value='login' className='flex flex-col gap-5 relative'>
                             <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
-                            <Input placeholder='Password' type='password' className='rounded-half p-6' name='password' value={formData.password} onChange={handleChange} />
+                            <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
                             <Button className='rounded-half p-6' onClick={handleLogin}>Login</Button>
+                            {!passwordVisible ? <Eye className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
                         </TabsContent>
-                        <TabsContent value='signup' className='flex flex-col gap-5'>
+                        <TabsContent value='signup' className='flex flex-col gap-5 relative'>
                             <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
-                            <Input placeholder='Password' type='password' className='rounded-half p-6' name='password' value={formData.password} onChange={handleChange} />
+                            <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
                             <Input placeholder='Confirm Password' type='password' className='rounded-half p-6' name='confirmPassword' value={formData.confirmPassword} onChange={handleChange} />
                             <Button className='rounded-half p-6' onClick={handleSignUp}>Sign Up</Button>
+                            {!passwordVisible ? <Eye className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
                         </TabsContent>
                     </Tabs>
                 </div>

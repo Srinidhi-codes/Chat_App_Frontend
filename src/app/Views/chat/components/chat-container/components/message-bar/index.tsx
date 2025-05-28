@@ -79,16 +79,16 @@ function MessageBar() {
                         fileUrl: undefined,
                     });
 
-                    await createMessage({
-                        variables: {
-                            input: {
-                                senderId: userInfo?.id,
-                                recipientId: selectedChatData.id,
-                                content: message,
-                                messageType: 'text',
-                            },
-                        },
-                    });
+                    // await createMessage({
+                    //     variables: {
+                    //         input: {
+                    //             senderId: userInfo?.id,
+                    //             recipientId: selectedChatData.id,
+                    //             content: message,
+                    //             messageType: 'text',
+                    //         },
+                    //     },
+                    // });
                 }
             }
         } catch (err) {
@@ -159,24 +159,17 @@ function MessageBar() {
             const fileUrl = await handleAssetUpload(file, uploadType);
             if (!fileUrl) return;
 
-            console.log('Uploading and sending:', {
-                fileUrl,
-                sender: userInfo?.id,
-                recipient: selectedChatData.id,
-                messageType,
-            });
-
-            await createMessage({
-                variables: {
-                    input: {
-                        senderId: userInfo?.id,
-                        recipientId: selectedChatData.id,
-                        messageType,
-                        fileUrl,
-                        content: '',
-                    },
-                },
-            });
+            // await createMessage({
+            //     variables: {
+            //         input: {
+            //             senderId: userInfo?.id,
+            //             recipientId: selectedChatData.id,
+            //             messageType,
+            //             fileUrl,
+            //             content: '',
+            //         },
+            //     },
+            // });
 
             socket?.emit('sendMessage', {
                 sender: userInfo?.id,

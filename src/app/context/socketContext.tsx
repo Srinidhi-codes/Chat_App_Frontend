@@ -25,7 +25,7 @@ interface SocketProviderProps {
 export const SocketProvider = ({ children }: SocketProviderProps) => {
     const socketRef = useRef<Socket | null>(null);
     const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-    const userInfo = useAppStore((state) => state.userInfo);
+    const { userInfo, selectedChatMessages, setSelectedChatMessages, selectedChatData, selectedChatType, addMessage } = useAppStore();
 
     useEffect(() => {
         if (userInfo) {
@@ -63,7 +63,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
             // Message handlers
             const handleReceiveMessage = (message: any) => {
-                const { selectedChatData, selectedChatType, addMessage } = useAppStore.getState();
 
                 if (
                     selectedChatType !== undefined &&
@@ -74,18 +73,19 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 }
             };
 
+            // SocketProvider: Change handleEditMessage to functional update
             const handleEditMessage = (updatedMessage: any) => {
-                const { selectedChatMessages, setSelectedChatMessages } = useAppStore.getState();
-
-                if (Array.isArray(selectedChatMessages)) {
-                    const updatedMessages = selectedChatMessages.map((msg) =>
+                setSelectedChatMessages((prevMessages: any) => {
+                    if (!Array.isArray(prevMessages)) {
+                        console.warn("selectedChatMessages was not an array, skipping update.");
+                        return prevMessages;
+                    }
+                    return prevMessages.map((msg) =>
                         msg.id === updatedMessage.id ? { ...msg, ...updatedMessage } : msg
                     );
-                    setSelectedChatMessages(updatedMessages);
-                } else {
-                    console.warn("selectedChatMessages was not an array, skipping update.");
-                }
+                });
             };
+
 
             socket.on('receiveMessage', handleReceiveMessage);
             socket.on('messageEdited', handleEditMessage);

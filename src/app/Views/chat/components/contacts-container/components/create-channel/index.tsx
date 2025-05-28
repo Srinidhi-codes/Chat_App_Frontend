@@ -55,7 +55,6 @@ function CreateChannel() {
         const getAll = async () => {
             try {
                 const { data } = await fetchAllContacts();
-                console.log(data, "TEST")
                 setAllContacts(data?.getAllContacts || []);
             } catch (error) {
                 console.error("Error fetching contacts:", error);
