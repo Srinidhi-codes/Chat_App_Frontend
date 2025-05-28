@@ -1,11 +1,13 @@
 import React from 'react';
-import { FaCopy, FaEdit } from 'react-icons/fa';
+import { FaCopy, FaEdit, FaRemoveFormat } from 'react-icons/fa';
+import { BiMessageSquareX } from "react-icons/bi";
 import { MdOutlineCancel } from 'react-icons/md';
 
 interface ContextMenuProps {
     x: number;
     y: number;
     onEdit: () => void;
+    onRemove: () => void;
     onCopy: () => void;
     onCancel: () => void;
     isUserMessage: boolean;
@@ -15,6 +17,7 @@ const ContextEditMenu: React.FC<ContextMenuProps> = ({
     x,
     y,
     onEdit,
+    onRemove,
     onCopy,
     onCancel,
     isUserMessage,
@@ -30,6 +33,14 @@ const ContextEditMenu: React.FC<ContextMenuProps> = ({
                     onClick={onEdit}
                 >
                     <FaEdit /> Edit
+                </div>
+            )}
+            {isUserMessage && (
+                <div
+                    className="flex items-center gap-3 hover:bg-white/10 p-2 cursor-pointer hover:text-red-500"
+                    onClick={onRemove}
+                >
+                    <BiMessageSquareX /> Delete
                 </div>
             )}
             <div

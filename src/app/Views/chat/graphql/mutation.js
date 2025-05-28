@@ -18,6 +18,7 @@ export const UPDATE_MESSAGE = gql`
       id
       content
       edited
+      updatedAt
     }
   }
 `;

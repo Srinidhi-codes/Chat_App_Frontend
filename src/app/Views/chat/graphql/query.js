@@ -8,6 +8,7 @@ export const GET_MESSAGES = gql`
       messageType
       fileUrl
       createdAt
+      updatedAt
       senderId
       edited
       recipientId

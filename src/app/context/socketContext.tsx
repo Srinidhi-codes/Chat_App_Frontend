@@ -86,13 +86,26 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 });
             };
 
+            // SocketProvider: Change handleEditMessage to functional delete
+            const handleDeleteMessage = (deletedMessage: any) => {
+                setSelectedChatMessages((prevMessages: any) => {
+                    if (!Array.isArray(prevMessages)) {
+                        console.warn("selectedChatMessages was not an array, skipping delete.");
+                        return prevMessages;
+                    }
+                    return prevMessages.filter((msg) => msg.id !== deletedMessage.id);
+                });
+            };
+
 
             socket.on('receiveMessage', handleReceiveMessage);
             socket.on('messageEdited', handleEditMessage);
+            socket.on('messageDeleted', handleDeleteMessage);
 
             return () => {
                 socket.off('receiveMessage', handleReceiveMessage);
                 socket.off('messageEdited', handleEditMessage);
+                socket.off('messageDeleted', handleDeleteMessage);
                 socket.off('onlineUsers');
                 socket.off('userOnline');
                 socket.off('userOffline');

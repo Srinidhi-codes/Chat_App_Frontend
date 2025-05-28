@@ -14,6 +14,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import { toast } from 'sonner';
 import ContextEditMenu from '@/components/ContextEditMenu';
+import { Button } from '@/components/ui/button';
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ['websocket'] });
 
@@ -131,16 +132,6 @@ function MessageContainer() {
 
     const handleSaveEditedMessage = async (messageId: string) => {
         try {
-            // await updateMessage({
-            //     variables: {
-            //         input: {
-            //             id: messageId,
-            //             content: editingMessageText,
-            //             edited: true,
-            //         }
-            //     }
-            // });
-
             socket.emit('editMessage', {
                 id: messageId,
                 content: editingMessageText,
@@ -153,11 +144,20 @@ function MessageContainer() {
             console.error("Failed to update message", error);
         }
     };
+    const handleRemoveMessage = async (messageId: string) => {
+        try {
+            socket.emit('deleteMessage', {
+                id: messageId,
+            });
+        } catch (error) {
+            console.error("Failed to delete message", error);
+        }
+    };
 
     const renderDMMessages = (message: any) => {
         const isSender = message?.senderId === userInfo?.id;
         const messageClass = isSender
-            ? 'bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50'
+            ? 'bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50 text-left'
             : 'bg-[#2a2b33]/5 text-white/80 border-white/50';
 
         return (
@@ -191,6 +191,10 @@ function MessageContainer() {
                             handleEditMessage(message.id, message.content, message.createdAt);
                             setShowOptions(false);
                         }}
+                        onRemove={() => {
+                            handleRemoveMessage(message.id);
+                            setShowOptions(false);
+                        }}
                         isUserMessage={isSender}
                         onCopy={() => {
                             if (message?.content) navigator.clipboard.writeText(message.content);
@@ -207,29 +211,48 @@ function MessageContainer() {
                             type="text"
                             value={editingMessageText}
                             onChange={(e) => setEditingMessageText(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault()
+                                    handleSaveEditedMessage(message.id)
+                                }
+                            }}
                             className="w-full px-3 py-2 rounded-xs text-sm bg-gray-800 text-white border border-gray-600"
                         />
                         <div className="flex gap-3 mt-1">
-                            <button
+                            <Button
+                                type="button"
                                 onClick={() => handleSaveEditedMessage(message.id)}
-                                className="text-blue-400 text-xs underline"
+                                className="text-md hover:text-green-500 bg-white/10"
                             >
                                 Save
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={() => setEditingMessageId(null)}
-                                className="text-gray-400 text-xs underline"
+                                className="text-md hover:text-blue-500 bg-white/10"
                             >
                                 Cancel
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 ) : (
                     <>
                         {message.messageType === 'text' && (
-                            <div className={`border inline-block p-4 max-w-[50%] break-words rounded-xs ${messageClass} noselect`}
+                            <div className={`border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-xs ${messageClass} noselect`}
                                 style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                                 {message.content}
+                                <div className='text-right flex gap-2 items-end'>
+                                    {message.edited && (
+                                        <div className="text-xs text-gray-400 italic mt-1">Edited</div>
+                                    )}
+                                    {message.edited && <span className='text-xl font-bold'>.</span>}
+                                    <div className='text-xs text-gray-600'>
+                                        {message.edited
+                                            ? moment(new Date(Number(message.updatedAt))).format('LT')
+                                            : moment(new Date(message.createdAt)).format('LT')}
+                                    </div>
+
+                                </div>
                             </div>
                         )}
 
@@ -258,13 +281,6 @@ function MessageContainer() {
                                 )}
                             </div>
                         )}
-
-                        {message.edited && (
-                            <div className="text-xs text-gray-400 italic mt-1">Edited</div>
-                        )}
-                        <div className='text-xs text-gray-600'>
-                            {moment(message.createdAt).format('LT')}
-                        </div>
                     </>
                 )}
             </div>
