@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner';
 import { useAppStore } from '@/store'
 import { Eye, EyeOff } from 'lucide-react'
+import { TbFidgetSpinner } from "react-icons/tb";
 
 export default function AuthPage() {
     const router = useRouter();
@@ -20,14 +21,11 @@ export default function AuthPage() {
         password: '',
         confirmPassword: ''
     });
-    const [signUp] = useMutation(SIGN_UP);
-    const [login] = useMutation(LOG_IN);
+    const [signUp, { loading: signUpLoading, error: signUpError }] = useMutation(SIGN_UP);
+    const [login, { loading: loginLoading, error: loginError }] = useMutation(LOG_IN);
 
     const handleChange = async (e: { target: { name: any; value: any } }) => {
         const { name, value } = e.target;
-        if (name === 'password') {
-            setPasswordVisible(true);
-        }
         setFormData((prevData) => ({
             ...prevData,
             [name]: value
@@ -35,6 +33,7 @@ export default function AuthPage() {
     }
 
     const handleLogin = async () => {
+        if (loginLoading) return;
         try {
             const { email, password } = formData;
             const { data } = await login({
@@ -50,7 +49,7 @@ export default function AuthPage() {
             toast("Login Success");
             router.push('/chat');
         } catch (error: any) {
-            toast(`${error.message}`);
+            toast(`Login Error, ${error.message}`);
         }
     }
     const handleSignUp = async () => {
@@ -97,15 +96,23 @@ export default function AuthPage() {
                         <TabsContent value='login' className='flex flex-col gap-5 relative'>
                             <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
                             <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
-                            <Button className='rounded-half p-6' onClick={handleLogin}>Login</Button>
-                            {!passwordVisible ? <Eye className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
+                            <Button className='rounded-half p-6 cursor-pointer'
+                                onClick={handleLogin}
+                                disabled={loginLoading}>
+                                {loginLoading ? (
+                                    <span className="flex items-center gap-2"><TbFidgetSpinner className="animate-spin" /> Logging In, Please Wait! </span>) : 'Login'}
+                            </Button>
+                            {passwordVisible ? <Eye className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
                         </TabsContent>
                         <TabsContent value='signup' className='flex flex-col gap-5 relative'>
                             <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
                             <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
                             <Input placeholder='Confirm Password' type='password' className='rounded-half p-6' name='confirmPassword' value={formData.confirmPassword} onChange={handleChange} />
-                            <Button className='rounded-half p-6' onClick={handleSignUp}>Sign Up</Button>
-                            {!passwordVisible ? <Eye className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
+                            <Button type='button' className='rounded-half p-6 cursor-pointer' onClick={handleSignUp} disabled={signUpLoading}>
+                                {signUpLoading ? (
+                                    <span className="flex items-center gap-2"><TbFidgetSpinner className="animate-spin" /> Signing In, Please Wait! </span>) : 'Signup'}
+                            </Button>
+                            {passwordVisible ? <Eye className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
                         </TabsContent>
                     </Tabs>
                 </div>

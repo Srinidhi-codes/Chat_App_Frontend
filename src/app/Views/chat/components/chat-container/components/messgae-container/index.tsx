@@ -13,8 +13,7 @@ import { IoCloseSharp } from 'react-icons/io5';
 import axios from 'axios';
 import io from 'socket.io-client';
 import { toast } from 'sonner';
-import ContextEditMenu from '@/components/ContextEditMenu';
-import { Button } from '@/components/ui/button';
+import MessageList from './components/message-list';
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ['websocket'] });
 
@@ -39,17 +38,13 @@ function MessageContainer() {
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
     const [fetchMessages, { data: fetchedMessages }] = useLazyQuery(GET_MESSAGES);
-    const [updateMessage] = useMutation(UPDATE_MESSAGE);
-
-    const checkIfImage = (filePath: string) =>
-        /\.(jpg|jpeg|png|gif|bmp|tiff|tif|webp|svg|ico|heic|heif)$/i.test(filePath);
 
     const downloadFile = async (fileUrl: string) => {
         try {
             setIsDownloading(true);
             setFileDownloadProgress(0);
             const fileName = fileUrl.split('/').pop();
-            const downloadUrl = `http://localhost:8080/api/download/${fileName}`;
+            const downloadUrl = fileUrl;
 
             const response = await axios.get(downloadUrl, {
                 responseType: 'blob',
@@ -77,44 +72,41 @@ function MessageContainer() {
         }
     };
 
-    const getMessages = () => {
-        if (selectedChatData?.id) {
-            fetchMessages({
-                variables: { input: { senderId: selectedChatData.id } },
-            });
+    useEffect(() => {
+        // Fetch messages when selectedChatData changes
+        if (selectedChatData?.id && selectedChatType === 'contact') {
+            fetchMessages({ variables: { input: { senderId: selectedChatData.id } } });
         }
-    };
+
+        // Scroll to bottom when messages change or chat is switched
+        if (scrollRef.current && isNearBottom()) {
+            scrollRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Cleanup: hide message options on outside click
+        const handleClick = () => {
+            if (showOptions) setShowOptions(false);
+        };
+        window.addEventListener('click', handleClick);
+
+        return () => {
+            window.removeEventListener('click', handleClick);
+        };
+    }, [selectedChatData, selectedChatType, selectedChatMessages, showOptions]);
+
+    useEffect(() => {
+        // Set fetched messages to state
+        if (fetchedMessages?.getMessage) {
+            setSelectedChatMessages(fetchedMessages.getMessage);
+        }
+    }, [fetchedMessages, setSelectedChatMessages]);
+
 
     const isNearBottom = () => {
         const container = document.querySelector('.scrollbar-hidden');
         return container ? (container.scrollHeight - container.scrollTop - container.clientHeight < 100) : true;
     };
 
-    useEffect(() => {
-        if (isNearBottom()) {
-            scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, [selectedChatMessages]);
-
-
-    useEffect(() => {
-        if (fetchedMessages?.getMessage) {
-            setSelectedChatMessages(fetchedMessages.getMessage);
-        }
-    }, [fetchedMessages, setSelectedChatMessages]);
-
-    useEffect(() => {
-        const handleClick = () => {
-            if (showOptions) setShowOptions(false);
-        };
-        window.addEventListener('click', handleClick);
-        return () => window.removeEventListener('click', handleClick);
-    }, [showOptions]);
-
-    useEffect(() => {
-        if (selectedChatData?.id && selectedChatType === 'contact') getMessages();
-        if (scrollRef.current) scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-    }, [selectedChatData, selectedChatType, selectedChatMessages]);
 
     const handleEditMessage = (id: string, content: string, createdAt: string) => {
         const now = new Date();
@@ -154,169 +146,47 @@ function MessageContainer() {
         }
     };
 
-    const renderDMMessages = (message: any) => {
-        const isSender = message?.senderId === userInfo?.id;
-        const messageClass = isSender
-            ? 'bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50 text-left'
-            : 'bg-[#2a2b33]/5 text-white/80 border-white/50';
-
-        return (
-            <div
-                key={message.id}
-                onContextMenu={(e) => {
-                    e.preventDefault();
-                    setSelectedMessageId(message.id);
-                    setShowOptions(true);
-                    setOptionsPosition({ x: e.clientX, y: e.clientY });
-                }}
-                onTouchStart={(e) => {
-                    const touchTimer = setTimeout(() => {
-                        setSelectedMessageId(message.id);
-                        setShowOptions(true);
-                        const touch = e.touches[0];
-                        setOptionsPosition({ x: touch.clientX, y: touch.clientY });
-                    }, 600);
-
-                    const clearTimer = () => clearTimeout(touchTimer);
-                    e.currentTarget.addEventListener('touchend', clearTimer, { once: true });
-                    e.currentTarget.addEventListener('touchmove', clearTimer, { once: true });
-                }}
-                className={`my-1 ${isSender ? 'text-right' : 'text-left'}`}
-            >
-                {showOptions && selectedMessageId === message.id && (
-                    <ContextEditMenu
-                        x={optionsPosition.x}
-                        y={optionsPosition.y}
-                        onEdit={() => {
-                            handleEditMessage(message.id, message.content, message.createdAt);
-                            setShowOptions(false);
-                        }}
-                        onRemove={() => {
-                            handleRemoveMessage(message.id);
-                            setShowOptions(false);
-                        }}
-                        isUserMessage={isSender}
-                        onCopy={() => {
-                            if (message?.content) navigator.clipboard.writeText(message.content);
-                            toast.success("Copied to clipboard!");
-                            setShowOptions(false);
-                        }}
-                        onCancel={() => setShowOptions(false)}
-                    />
-                )}
-
-                {editingMessageId === message.id ? (
-                    <div className="inline-block max-w-[50%]">
-                        <input
-                            type="text"
-                            value={editingMessageText}
-                            onChange={(e) => setEditingMessageText(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey) {
-                                    e.preventDefault()
-                                    handleSaveEditedMessage(message.id)
-                                }
-                            }}
-                            className="w-full px-3 py-2 rounded-xs text-sm bg-gray-800 text-white border border-gray-600"
-                        />
-                        <div className="flex gap-3 mt-1">
-                            <Button
-                                type="button"
-                                onClick={() => handleSaveEditedMessage(message.id)}
-                                className="text-md hover:text-green-500 bg-white/10"
-                            >
-                                Save
-                            </Button>
-                            <Button
-                                onClick={() => setEditingMessageId(null)}
-                                className="text-md hover:text-blue-500 bg-white/10"
-                            >
-                                Cancel
-                            </Button>
-                        </div>
-                    </div>
-                ) : (
-                    <>
-                        {message.messageType === 'text' && (
-                            <div className={`border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-xs ${messageClass} noselect`}
-                                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
-                                {message.content}
-                                <div className='text-right flex gap-2 items-end'>
-                                    {message.edited && (
-                                        <div className="text-xs text-gray-400 italic mt-1">Edited</div>
-                                    )}
-                                    {message.edited && <span className='text-xl font-bold'>.</span>}
-                                    <div className='text-xs text-gray-600'>
-                                        {message.edited
-                                            ? moment(new Date(Number(message.updatedAt))).format('LT')
-                                            : moment(new Date(message.createdAt)).format('LT')}
-                                    </div>
-
-                                </div>
-                            </div>
-                        )}
-
-                        {(message.messageType === 'file' || message.messageType === 'image' || message.messageType === 'video') && (
-                            <div className={`border inline-block p-4 max-w-[50%] break-words rounded-xs ${messageClass}`}>
-                                {checkIfImage(message.fileUrl) ? (
-                                    <div className='cursor-pointer' onClick={() => {
-                                        setShowImage(true);
-                                        setImageUrl(message?.fileUrl);
-                                    }}>
-                                        <Image src={message.fileUrl} alt="Image" height={300} width={300} />
-                                    </div>
-                                ) : (
-                                    <div className='flex justify-center items-center gap-3'>
-                                        <span className='text-white/80 text-3xl bg-black/20 rounded-full p-3'>
-                                            <MdFolderZip />
-                                        </span>
-                                        <span>{message?.fileUrl?.split("/").pop() ?? 'Unknown File'}</span>
-                                        <span
-                                            className='bg-black/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300'
-                                            onClick={() => downloadFile(message.fileUrl)}
-                                        >
-                                            <IoMdArrowRoundDown />
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
-        );
-    };
-
-    const renderMessages = () => {
-        let lastDate = '';
-        if (!Array.isArray(selectedChatMessages) || selectedChatMessages.length === 0) {
-            return <div className="text-center text-gray-400 mt-4">No messages yet.</div>;
-        }
-
-        return selectedChatMessages.map((message: any) => {
-            const messageDate = moment(message.createdAt).format('YYYY-MM-DD');
-            const showDate = messageDate !== lastDate;
-            lastDate = messageDate;
-
-            return (
-                <div key={message.id}>
-                    {showDate && (
-                        <div className='text-center text-gray-500 my-2'>
-                            {moment(message.createdAt).format('LL')}
-                        </div>
-                    )}
-                    {selectedChatType === 'contact' && renderDMMessages(message)}
-                </div>
-            );
+    const handleReactToMessage = (messageId: string, type: string) => {
+        socket.emit('reactToMessage', {
+            messageId,
+            userId: userInfo?.id,
+            type
         });
     };
 
     return (
         <div className='flex-1 overflow-y-auto scrollbar-hidden p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full'>
-            {renderMessages()}
+            <MessageList
+                messages={selectedChatMessages}
+                userId={userInfo?.id}
+                selectedChatType={selectedChatType}
+                selectedMessageId={selectedMessageId}
+                showOptions={showOptions}
+                optionsPosition={optionsPosition}
+                editingMessageId={editingMessageId}
+                editingMessageText={editingMessageText}
+                setEditingMessageId={setEditingMessageId}
+                setEditingMessageText={setEditingMessageText}
+                setSelectedMessageId={setSelectedMessageId}
+                setShowOptions={setShowOptions}
+                setOptionsPosition={setOptionsPosition}
+                handleEditMessage={handleEditMessage}
+                handleSaveEditedMessage={handleSaveEditedMessage}
+                handleRemoveMessage={handleRemoveMessage}
+                handleReactToMessage={handleReactToMessage}
+                onCopy={(text) => {
+                    if (text) navigator.clipboard.writeText(text);
+                    toast.success("Copied to clipboard!");
+                }}
+                onDownloadFile={downloadFile}
+                onShowImage={(url) => {
+                    setShowImage(true);
+                    setImageUrl(url);
+                }}
+            />
             <div ref={scrollRef} />
             {showImage && imageURL && (
-                <div className='fixed z-[1000] top-0 left-0 md:h-[100vh] h-[100dvh] md:w-[100vw] w-[100dvw]  flex items-center justify-center backdrop-blur-lg'>
+                <div className='fixed z-[1000] top-0 left-0 md:h-[100vh] h-[100dvh] md:w-[100vw] w-[100dvw] flex items-center justify-center backdrop-blur-lg'>
                     <div>
                         <Image src={imageURL} alt="Image View" width={300} height={300} className='h-[80vh] w-full bg-cover rounded-xl' />
                     </div>
@@ -324,7 +194,10 @@ function MessageContainer() {
                         <button className='bg-white/10 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300' onClick={() => downloadFile(imageURL)}>
                             <IoMdArrowRoundDown />
                         </button>
-                        <button className='bg-white/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300' onClick={() => { setShowImage(false); setImageUrl(null); }}>
+                        <button className='bg-white/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300' onClick={() => {
+                            setShowImage(false);
+                            setImageUrl(null);
+                        }}>
                             <IoCloseSharp />
                         </button>
                     </div>
@@ -332,6 +205,7 @@ function MessageContainer() {
             )}
         </div>
     );
+
 }
 
 export default MessageContainer;

@@ -15,13 +15,14 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function ProfilePage() {
-    const { userInfo, setUserInfo, isOtherProfile, otherProfileData, setIsOtherProfile, } = useAppStore();
+    const { userInfo, setUserInfo, isOtherProfile, otherProfileData, setIsOtherProfile, setFileUploadProgress, setIsUploading, } = useAppStore();
     const router = useRouter();
 
     const [userData, setUserData] = useState({
         firstName: '',
         lastName: '',
         image: null as string | null,
+        email: ''
     });
 
     const [selectedColor, setSelectedColor] = useState(0);
@@ -36,6 +37,7 @@ export default function ProfilePage() {
                 firstName: otherProfileData.firstName || '',
                 lastName: otherProfileData.lastName || '',
                 image: otherProfileData.image || null,
+                email: otherProfileData.email || '',
             });
             setSelectedColor(otherProfileData.color || 0);
         } else if (userInfo) {
@@ -43,6 +45,7 @@ export default function ProfilePage() {
                 firstName: userInfo.firstName || '',
                 lastName: userInfo.lastName || '',
                 image: userInfo.image || null,
+                email: userInfo.email || ''
             });
             setSelectedColor(userInfo.color || 0);
         } else {
@@ -73,19 +76,30 @@ export default function ProfilePage() {
         try {
             const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
             const api = `https://api.cloudinary.com/v1_1/${cloudName}/${type}/upload`;
-            const res = await axios.post(api, data);
+
+            const res = await axios.post(api, data, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                onUploadProgress: (progressEvent: any) => {
+                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setFileUploadProgress(percent);
+                },
+            });
+
             const assetUrl = res.data.secure_url;
+
+            // Only do this here if this function is responsible for updating state
             setUserData((prev) => ({
                 ...prev,
                 image: assetUrl,
             }));
+
+            return assetUrl;
         } catch (error) {
             console.error(error);
             toast.error('Failed to upload asset');
             return null;
         }
     };
-
 
     const validateProfile = () => {
         if (!userData.firstName.trim()) {
@@ -139,10 +153,19 @@ export default function ProfilePage() {
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        try {
+            setIsUploading(true);
+            setFileUploadProgress(0);
+            const imageUrl = await handleAssetUpload(file, 'image');
+            if (imageUrl) {
+                setUserData((prev) => ({ ...prev, image: imageUrl }));
+                setIsUploading(false);
+                setFileUploadProgress(0);
+            }
 
-        const imageUrl = await handleAssetUpload(file, 'image');
-        if (imageUrl) {
-            setUserData((prev) => ({ ...prev, image: imageUrl }));
+        } catch (error) {
+            console.log(error);
+            setIsUploading(false);
         }
     };
 
@@ -209,7 +232,7 @@ export default function ProfilePage() {
                             placeholder="Email"
                             type="email"
                             disabled
-                            value={userInfo?.email || ''}
+                            value={userData?.email || ''}
                             readOnly={isOtherProfile}
                             className="rounded-lg p-4 md:p-6 bg-[#8d92b1] border-none w-full"
                         />

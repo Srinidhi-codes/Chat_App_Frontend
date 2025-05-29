@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/Views/auth/graphql/mutation.js", "src/app/(root)/provider.js", "src/app/context/socketContext.tsx", "src/app/Views/chat/components/contacts-container/components/new-dm/index.tsx", "src/app/Views/chat/components/chat-container/components/message-bar/index.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/Views/auth/graphql/mutation.js", "src/app/(root)/provider.js", "src/app/context/socketContext.tsx", "src/app/Views/chat/components/contacts-container/components/new-dm/index.tsx", "src/app/Views/chat/components/chat-container/components/message-bar/index.tsx", "src/app/Views/chat/components/chat-container/components/messgae-container/components/message-items"],
   "exclude": ["node_modules"]
 }

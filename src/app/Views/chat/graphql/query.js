@@ -12,6 +12,10 @@ export const GET_MESSAGES = gql`
       senderId
       edited
       recipientId
+      reactions {
+      type
+      userId
+    }
     }
   }
 `;
