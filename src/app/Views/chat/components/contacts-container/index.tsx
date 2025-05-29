@@ -6,6 +6,7 @@ import { GET_CONTACTS_FOR_DM_LIST, GET_USER_CHANNELS } from './graphql/query';
 import { useAppStore } from "@/store";
 import ContactList from "@/components/contact-list"
 import CreateChannel from "./components/create-channel";
+import Image from "next/image";
 
 const ContactsContainer = () => {
     const [fetchContactsForDMList, { data: fetchedContactsForDMList }] = useLazyQuery(GET_CONTACTS_FOR_DM_LIST);
@@ -29,15 +30,16 @@ const ContactsContainer = () => {
 
     return (
         <div className="relative flex flex-col items-start md:w-[35vw] lg:w-[30vw] xl:w-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b] w-full">
-            <div className="pt-3">
-                {/* {Logo} */}
+            <div className="p-3 flex gap-4 items-center justify-center w-full">
+                <Image className="h-[3.5rem] w-[3.5rem] rounded-[35%]" src={'/logo.svg'} alt="Logo" height={100} width={100} />
+                <span className='text-purple-500 text-xl md:text-3xl animate-glow'>Connectify</span>
             </div>
             <div className="my-5 w-full">
                 <div className="flex items-center justify-between pr-10 gap-5">
                     <Title text='Direct Messages' />
                     <NewDM />
                 </div>
-                {directMessagesContacts ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full">
+                {directMessagesContacts ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full px-[2.2rem]">
                     <ContactList isChannel={false} />
                 </div> :
                     <div className="text-center p-2">
@@ -49,7 +51,7 @@ const ContactsContainer = () => {
                     <Title text='Channels' />
                     <CreateChannel />
                 </div>
-                {channels ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full">
+                {channels ? <div className="max-h-[38vh] overflow-y-auto scroll-hidden w-full px-[2.2rem]">
                     <ContactList isChannel={true} />
                 </div> :
                     <div className="text-center p-2">

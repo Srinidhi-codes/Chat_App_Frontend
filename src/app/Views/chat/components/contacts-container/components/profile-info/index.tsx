@@ -15,7 +15,7 @@ import { LOGOUT_MUTATION } from '../../graphql/mutation'
 
 
 function ProfileInfo() {
-    const { userInfo, setUserInfo } = useAppStore();
+    const { userInfo, setUserInfo, setSelectedChatData, setSelectedChatType, setSelectedChatMessages, closeChat } = useAppStore();
     const router = useRouter();
     const [logoutMutation, { loading, error, data }] = useMutation(LOGOUT_MUTATION);
 
@@ -23,6 +23,10 @@ function ProfileInfo() {
         try {
             const result = await logoutMutation();
             if (result?.data?.logout) {
+                setSelectedChatData([]),
+                    setSelectedChatType(''),
+                    setSelectedChatMessages([]),
+                    closeChat();
                 setUserInfo(null);
                 localStorage.setItem("token", "");
                 router.push('/auth');

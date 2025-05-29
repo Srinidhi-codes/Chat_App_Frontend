@@ -84,7 +84,7 @@ const ContactList = ({ isChannel }) => {
                                 e.currentTarget.addEventListener("touchend", () => clearTimeout(timer), { once: true });
                                 e.currentTarget.addEventListener("touchmove", () => clearTimeout(timer), { once: true });
                             }}
-                            className={`pl-10 py-2 transition-all duration-300 cursor-pointer noselect ${isSelected ? "bg-[#8417ff]" : "hover:bg-[#f1f1f111]"
+                            className={`p-2 transition-all duration-300 cursor-pointer noselect rounded-3xl ${isSelected ? "bg-[#8417ff]" : "hover:bg-[#f1f1f111]"
                                 }`}
                         >
                             <div className="flex gap-3 items-center justify-start text-neutral-300 relative">

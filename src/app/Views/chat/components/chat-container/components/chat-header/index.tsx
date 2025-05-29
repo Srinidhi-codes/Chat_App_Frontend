@@ -1,3 +1,4 @@
+import { useSocket } from "@/app/context/socketContext";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button"
 import { getColor } from "@/lib/utils";
@@ -6,13 +7,17 @@ import { useRouter } from "next/navigation";
 import { RiCloseFill } from "react-icons/ri"
 
 function ChatHeader() {
-    const { closeChat, selectedChatData, selectedChatType, setIsOtherProfile, setOtherProfileData, onlineUsers } = useAppStore();
+    const { closeChat, selectedChatData, selectedChatType, setIsOtherProfile, setOtherProfileData } = useAppStore();
+    const { onlineUsers } = useSocket();
     const router = useRouter();
-    const isOnline = selectedChatType == 'contact' && onlineUsers.includes(selectedChatData.id);
+    const isOnline = selectedChatType === 'contact' &&
+        selectedChatData?.id != null &&
+        onlineUsers.includes(String(selectedChatData.id));
+
     return (
-        <div className="h-[10vh] border-b-2 border-[#2f303b] flex justify-between md:px-20 px-5 items-center">
+        <div className="h-[10vh] border-b-2 border-[#2f303b] flex justify-between md:px-10 px-2 items-center">
             <div className="flex gap-5 items-center w-full justify-between">
-                <div className="flex gap-3 items-center justify-center cursor-pointer" onClick={() => {
+                <div className="flex gap-3 min-w-fit items-center justify-center cursor-pointer" onClick={() => {
                     setIsOtherProfile(true);
                     setOtherProfileData(selectedChatData);
                     router.push("/profile");

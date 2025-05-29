@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Image from 'next/image';
 import moment from 'moment';
 import { MdFolderZip } from 'react-icons/md';
@@ -62,12 +62,32 @@ const MessageItem: React.FC<MessageItemProps> = ({
 
     const [showPicker, setShowPicker] = useState(false);
     const [activeEmojiPickerId, setActiveEmojiPickerId] = useState<string | null>(null);
+    const emojiButtonRef = useRef<HTMLButtonElement | null>(null);
+    const [emojiPickerPosition, setEmojiPickerPosition] = useState<'top' | 'bottom'>('top');
+
 
     const handleEmojiClick = (emojiData: any) => {
         const emoji = emojiData.emoji;
         handleReactToMessage(message.id, emoji);
         setActiveEmojiPickerId(null);
     };
+
+    const toggleEmojiPicker = () => {
+        if (emojiButtonRef.current) {
+            const rect = emojiButtonRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            if (spaceBelow < 330 && spaceAbove > 330) {
+                setEmojiPickerPosition('top'); // show above
+            } else {
+                setEmojiPickerPosition('bottom'); // show below
+            }
+
+            setActiveEmojiPickerId((prev) => (prev === message.id ? null : message.id));
+        }
+    };
+
 
     return (
         <div
@@ -121,25 +141,53 @@ const MessageItem: React.FC<MessageItemProps> = ({
                 </div>
             ) : (
                 <>
-                    <div className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-xs ${messageClass} noselect`}>
+                    <div
+                        className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-[1.025rem] ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'
+                            }`}
+                    >
+
                         {message.content}
+
+                        {(message.messageType === 'file' || message.messageType === 'image' || message.messageType === 'video') && (
+                            <div className={`inline-block p-4 break-words rounded-[1.025rem] ${messageClass}`}>
+                                {checkIfImage(message.fileUrl) ? (
+                                    <div className="cursor-pointer" onClick={() => onShowImage(message.fileUrl)}>
+                                        <Image className='rounded-[1.025rem]' src={message.fileUrl} alt="Image" height={300} width={300} />
+                                    </div>
+                                ) : (
+                                    <div className="flex justify-center items-center gap-3">
+                                        <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3"><MdFolderZip /></span>
+                                        <span>{message?.fileUrl?.split("/").pop() ?? 'Unknown File'}</span>
+                                        <span
+                                            className="bg-black/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer"
+                                            onClick={() => onDownloadFile(message.fileUrl)}
+                                        >
+                                            <IoMdArrowRoundDown />
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <div className="flex justify-between items-center mt-1">
-                            <div className="flex gap-1 items-center">
+                            <div className="text-xs text-gray-600 text-right">
+                                {message.edited && <span className="italic mr-1">Edited</span>}
+                                {moment(message.edited ? message.updatedAt : message.createdAt).format('LT')}
+                            </div>
+                        </div>
+
+                        {/* Only show reactions and emoji picker for text messages */}
+                        <div className="relative mt-1">
+                            <div className={`flex items-center gap-2 ${message.reactions?.length > 0 && 'justify-between'}`}>
                                 <button
-                                    onClick={() => setActiveEmojiPickerId((prev) => (prev === message.id ? null : message.id))}
+                                    ref={emojiButtonRef}
+                                    onClick={toggleEmojiPicker}
                                     className="text-gray-500 hover:text-white"
                                     title="React"
                                 >
                                     <FaRegSmile />
                                 </button>
-
-                                {activeEmojiPickerId === message.id && (
-                                    <div className="absolute bottom-full mb-2 left-0 z-[999]">
-                                        <EmojiPicker onEmojiClick={handleEmojiClick} height={300} width={250} />
-                                    </div>
-                                )}
                                 {message.reactions?.length > 0 && (
-                                    <div className="absolute left-[70%] top-[105%]">
+                                    <div className="flex gap-1 mt-2 flex-wrap">
                                         {message.reactions.map((reaction: any, index: any) => (
                                             <span key={index} className="text-xl px-2 py-0.5 bg-white/80 rounded-full">
                                                 {reaction.type}
@@ -148,36 +196,21 @@ const MessageItem: React.FC<MessageItemProps> = ({
                                     </div>
                                 )}
 
-                            </div>
-                            <div className="text-xs text-gray-600 text-right">
-                                {message.edited && <span className="italic mr-1">Edited</span>}
-                                {moment(message.edited ? message.updatedAt : message.createdAt).format('LT')}
+                                {/* Picker aligned to emoji button and toggled based on space */}
+                                {activeEmojiPickerId === message.id && (
+                                    <div
+                                        className={`absolute z-[999] ${emojiPickerPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0`}
+                                    >
+                                        <EmojiPicker onEmojiClick={handleEmojiClick} height={300} width={250} />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {(message.messageType === 'file' || message.messageType === 'image' || message.messageType === 'video') && (
-                        <div className={`border inline-block p-4 max-w-[50%] break-words rounded-xs ${messageClass}`}>
-                            {checkIfImage(message.fileUrl) ? (
-                                <div className="cursor-pointer" onClick={() => onShowImage(message.fileUrl)}>
-                                    <Image src={message.fileUrl} alt="Image" height={300} width={300} />
-                                </div>
-                            ) : (
-                                <div className="flex justify-center items-center gap-3">
-                                    <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3"><MdFolderZip /></span>
-                                    <span>{message?.fileUrl?.split("/").pop() ?? 'Unknown File'}</span>
-                                    <span
-                                        className="bg-black/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer"
-                                        onClick={() => onDownloadFile(message.fileUrl)}
-                                    >
-                                        <IoMdArrowRoundDown />
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </>
-            )}
+            )
+            }
         </div >
     );
 };

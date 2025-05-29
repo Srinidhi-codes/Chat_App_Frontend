@@ -127,9 +127,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 );
             };
 
-
-
-
             socket.on('receiveMessage', handleReceiveMessage);
             socket.on('messageEdited', handleEditMessage);
             socket.on('messageDeleted', handleDeleteMessage);
