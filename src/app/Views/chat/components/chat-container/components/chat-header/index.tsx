@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { RiCloseFill } from "react-icons/ri"
 
 function ChatHeader() {
-    const { closeChat, selectedChatData, selectedChatType, setIsOtherProfile, setOtherProfileData } = useAppStore();
+    const { closeChat, selectedChatData, selectedChatType, setIsOtherProfile, setOtherProfileData, onlineUsers } = useAppStore();
     const router = useRouter();
+    const isOnline = selectedChatType == 'contact' && onlineUsers.includes(selectedChatData.id);
     return (
         <div className="h-[10vh] border-b-2 border-[#2f303b] flex justify-between md:px-20 px-5 items-center">
             <div className="flex gap-5 items-center w-full justify-between">
@@ -49,6 +50,17 @@ function ChatHeader() {
                                 ? `${selectedChatData.firstName} ${selectedChatData.lastName}`
                                 : selectedChatData?.email}
                         </span>
+                        {isOnline ?
+                            <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 bg-green-500 border border-white rounded-full"></span>
+                                <span className="text-xs font-medium text-green-500">Online</span>
+                            </div>
+                            :
+                            <div className="flex items-center gap-2">
+                                <span className=" h-2.5 w-2.5 bg-gray-500 border border-white rounded-full"></span>
+                                <span className="text-xs font-medium text-gray-500">Offline</span>
+                            </div>
+                        }
                     </div>
                 </div>
                 <div className="flex items-center justify-center gap-5">

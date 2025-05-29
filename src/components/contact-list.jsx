@@ -4,7 +4,6 @@ import { getColor } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import ContextRemoveMenu from "./ContextRemoveMenu";
 import { useSocket } from "@/app/context/socketContext";
-import { useRouter } from "next/navigation";
 
 const ContactList = ({ isChannel }) => {
     const {
@@ -18,11 +17,8 @@ const ContactList = ({ isChannel }) => {
         removeContact,
         removeChannel,
         selectedChatType,
-        setIsOtherProfile,
-        setOtherProfileData
     } = useAppStore();
     const { onlineUsers } = useSocket();
-    const router = useRouter();
 
     const [selectedContactId, setSelectedContactId] = useState(null);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -88,19 +84,13 @@ const ContactList = ({ isChannel }) => {
                                 e.currentTarget.addEventListener("touchend", () => clearTimeout(timer), { once: true });
                                 e.currentTarget.addEventListener("touchmove", () => clearTimeout(timer), { once: true });
                             }}
-                            className={`pl-10 py-2 transition-all duration-300 cursor-pointer ${isSelected ? "bg-[#8417ff]" : "hover:bg-[#f1f1f111]"
+                            className={`pl-10 py-2 transition-all duration-300 cursor-pointer noselect ${isSelected ? "bg-[#8417ff]" : "hover:bg-[#f1f1f111]"
                                 }`}
                         >
                             <div className="flex gap-3 items-center justify-start text-neutral-300 relative">
                                 {!isChannel ? (
                                     <div className="relative">
-                                        <Avatar className="h-10 w-10 rounded-full overflow-hidden hover:scale-110 duration-300 transition-all"
-                                            onClick={() => {
-                                                setIsOtherProfile(true);
-                                                setOtherProfileData(selectedChatData);
-                                                router.push("/profile");
-                                            }}
-                                        >
+                                        <Avatar className="h-10 w-10 rounded-full overflow-hidden hover:scale-110 duration-300 transition-all">
                                             {contact?.image ? (
                                                 <AvatarImage
                                                     src={contact.image}

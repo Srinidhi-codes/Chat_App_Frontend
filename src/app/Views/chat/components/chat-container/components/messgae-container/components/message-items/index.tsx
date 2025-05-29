@@ -121,7 +121,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
                 </div>
             ) : (
                 <>
-                    <div className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-xs ${messageClass}`}>
+                    <div className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-xs ${messageClass} noselect`}>
                         {message.content}
                         <div className="flex justify-between items-center mt-1">
                             <div className="flex gap-1 items-center">
