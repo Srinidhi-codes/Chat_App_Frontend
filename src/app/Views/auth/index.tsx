@@ -5,27 +5,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useMutation } from '@apollo/client'
 import Image from 'next/image'
 import React, { useState } from 'react'
-import { LOG_IN, SIGN_UP } from './graphql/mutation'
-import { useRouter } from 'next/navigation'
+import { INIT_SIGN_UP, INIT_LOGIN } from './graphql/mutation'
 import { toast } from 'sonner';
-import { useAppStore } from '@/store'
 import { Eye, EyeOff } from 'lucide-react'
 import { TbFidgetSpinner } from "react-icons/tb";
+import Otp from '@/components/Otp'
 
 export default function AuthPage() {
-    const router = useRouter();
-    const { setUserInfo } = useAppStore();
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         confirmPassword: ''
     });
-    const [signUp, { loading: signUpLoading, error: signUpError }] = useMutation(SIGN_UP);
-    const [login, { loading: loginLoading, error: loginError }] = useMutation(LOG_IN);
+    const [userDetails, setUserDetails] = useState('')
+    const [signUp, { loading: signUpLoading, error: signUpError }] = useMutation(INIT_SIGN_UP);
+    const [login, { loading: loginLoading, error: loginError }] = useMutation(INIT_LOGIN);
 
     const handleChange = async (e: { target: { name: any; value: any } }) => {
         const { name, value } = e.target;
+        if (name === 'email') {
+            setUserDetails(value);
+        }
         setFormData((prevData) => ({
             ...prevData,
             [name]: value
@@ -33,48 +35,46 @@ export default function AuthPage() {
     }
 
     const handleLogin = async () => {
-        if (loginLoading) return;
+        if (loginLoading) return
         try {
-            const { email, password } = formData;
-            const { data } = await login({
-                variables: {
-                    input: {
-                        email,
-                        password
-                    }
-                }
-            });
-            setUserInfo(data.login)
-            localStorage.setItem("token", data.login.token);
-            toast("Login Success");
-            router.push('/chat');
+            const { email, password } = formData
+            const { data } = await login({ variables: { input: { email, password } } })
+
+            if (data?.initLogin?.message) {
+                toast(data?.initLogin?.message)
+                setOtpSent(true);
+                setUserDetails(email);
+            } else {
+                toast('Failed to send OTP')
+            }
         } catch (error: any) {
-            toast(`Login Error, ${error.message}`);
+            toast(`Login Error, ${error.message}`)
         }
     }
-    const handleSignUp = async () => {
-        try {
-            const { email, password, confirmPassword } = formData;
-            if (password !== confirmPassword) {
-                throw new Error("Passwords do not match");
-            }
 
-            const { data } = await signUp({
-                variables: {
-                    input: {
-                        email,
-                        password
-                    }
-                }
-            });
-            setUserInfo(data.signUp);
-            localStorage.setItem("token", data.signUp.token);
-            toast("SignUp Success");
-            router.push('/chat');
-        } catch (error: any) {
-            toast(`SignUp Error, ${error.message}`);
+    const handleSignUp = async () => {
+        if (signUpLoading) return
+        const { email, password, confirmPassword } = formData
+        if (password !== confirmPassword) {
+            toast('Passwords do not match')
+            return
         }
-    };
+
+        try {
+            const { data } = await signUp({ variables: { input: { email, password } } })
+
+            if (data?.initSignUp?.message) {
+                toast(data?.initSignUp?.message)
+                setUserDetails(email);
+                setOtpSent(true)
+            } else {
+                toast('Failed to send OTP')
+            }
+        } catch (error: any) {
+            toast(`SignUp Error, ${error.message}`)
+        }
+    }
+
 
     return (
         <div className='md:h-[100vh] h-[100dvh] md:w-[100vw] w-[100dvw] flex items-center justify-center'>
@@ -88,33 +88,38 @@ export default function AuthPage() {
                     </div>
                 </div>
                 <div className='flex items-center justify-center w-full'>
-                    <Tabs className='w-3/4' defaultValue='login'>
-                        <TabsList className='bg-transparent rounded-none w-full'>
-                            <TabsTrigger value='login' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Login</TabsTrigger>
-                            <TabsTrigger value='signup' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Signup</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value='login' className='flex flex-col gap-5 relative'>
-                            <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
-                            <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
-                            <Button className='rounded-half p-6 cursor-pointer'
-                                onClick={handleLogin}
-                                disabled={loginLoading}>
-                                {loginLoading ? (
-                                    <span className="flex items-center gap-2"><TbFidgetSpinner className="animate-spin" /> Logging In, Please Wait! </span>) : 'Login'}
-                            </Button>
-                            {passwordVisible ? <Eye className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
-                        </TabsContent>
-                        <TabsContent value='signup' className='flex flex-col gap-5 relative'>
-                            <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
-                            <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
-                            <Input placeholder='Confirm Password' type='password' className='rounded-half p-6' name='confirmPassword' value={formData.confirmPassword} onChange={handleChange} />
-                            <Button type='button' className='rounded-half p-6 cursor-pointer' onClick={handleSignUp} disabled={signUpLoading}>
-                                {signUpLoading ? (
-                                    <span className="flex items-center gap-2"><TbFidgetSpinner className="animate-spin" /> Signing In, Please Wait! </span>) : 'Signup'}
-                            </Button>
-                            {passwordVisible ? <Eye className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
-                        </TabsContent>
-                    </Tabs>
+                    {otpSent ?
+                        (<Otp
+                            userDetails={userDetails}
+                        />)
+                        :
+                        (<Tabs className='w-3/4' defaultValue='login'>
+                            <TabsList className='bg-transparent rounded-none w-full'>
+                                <TabsTrigger value='login' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Login</TabsTrigger>
+                                <TabsTrigger value='signup' className='data-[state=active]:bg-transparent text-black text-opacity-90 border-b-2 rounded-none w-full data-[state=active]:font-semibold data-[state=active]:border-b-purple-500 p-3 transition-all duration-300'>Signup</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value='login' className='flex flex-col gap-5 relative'>
+                                <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
+                                <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
+                                <Button className='rounded-half p-6 cursor-pointer'
+                                    onClick={handleLogin}
+                                    disabled={loginLoading}>
+                                    {loginLoading ? (
+                                        <span className="flex items-center gap-2"><TbFidgetSpinner className="animate-spin" /> Logging In, Please Wait! </span>) : 'Login'}
+                                </Button>
+                                {passwordVisible ? <Eye className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[42%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
+                            </TabsContent>
+                            <TabsContent value='signup' className='flex flex-col gap-5 relative'>
+                                <Input placeholder='Email' type='email' className='rounded-half p-6' name='email' value={formData.email} onChange={handleChange} />
+                                <Input placeholder='Password' type={`${passwordVisible ? 'text' : 'password'}`} className='rounded-half p-6 relative' name='password' value={formData.password} onChange={handleChange} />
+                                <Input placeholder='Confirm Password' type='password' className='rounded-half p-6' name='confirmPassword' value={formData.confirmPassword} onChange={handleChange} />
+                                <Button type='button' className='rounded-half p-6 cursor-pointer' onClick={handleSignUp} disabled={signUpLoading}>
+                                    {signUpLoading ? (
+                                        <span className="flex items-center gap-2"><TbFidgetSpinner className="animate-spin" /> Signing In, Please Wait! </span>) : 'Signup'}
+                                </Button>
+                                {passwordVisible ? <Eye className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} /> : <EyeOff className='absolute right-[3%] bottom-[58%]' onClick={() => setPasswordVisible(!passwordVisible)} />}
+                            </TabsContent>
+                        </Tabs>)}
                 </div>
             </div>
         </div>

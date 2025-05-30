@@ -1,19 +1,32 @@
 import { gql } from '@apollo/client'
 
-export const SIGN_UP = gql`
-mutation SignUp($input: SignUpInput!) {
-  signUp(input: $input) {
-    id
-    email
-    token
-    profileSetup
+export const INIT_SIGN_UP = gql`
+mutation InitSignUp($input: AuthInput!) {
+  initSignUp(input: $input) {
+    message
   }
 }
 `;
 
-export const LOG_IN = gql`
-mutation Login($input: LoginInput!) {
-  login(input: $input) {
+
+export const INIT_LOGIN = gql`
+mutation InitLogin($input: AuthInput!) {
+  initLogin(input: $input) {
+    message
+  }
+}
+`;
+export const RESEND_OTP = gql`
+mutation ResendOtp($input: ResendOtpInput!) {
+  resendOtp(input: $input) {
+    message
+  }
+}
+`;
+
+export const VERIFY_OTP = gql`
+mutation VerifyOtp($email: String!, $otp: String!) {
+  verifyOtp(email: $email, otp: $otp) {
     id
     email
     token
@@ -24,4 +37,19 @@ mutation Login($input: LoginInput!) {
     image
   }
 }
+`;
+
+
+
+export const FORGOT_PASSWORD_MUTATION = gql`
+  mutation ForgotPassword($email: String!) {
+    forgotPassword(email: $email)
+  }
+`;
+
+// Reset Password
+export const RESET_PASSWORD_MUTATION = gql`
+  mutation ResetPassword($token: String!, $newPassword: String!) {
+    resetPassword(token: $token, newPassword: $newPassword)
+  }
 `;
