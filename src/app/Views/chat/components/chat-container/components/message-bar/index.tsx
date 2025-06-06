@@ -73,7 +73,7 @@ function MessageBar() {
                 if (selectedChatType === 'contact') {
                     socket?.emit('sendMessage', {
                         sender: userInfo?.id,
-                        recipient: selectedChatData.id,
+                        recipient: selectedChatData?.id,
                         content: message,
                         messageType: 'text',
                         fileUrl: undefined,
@@ -89,7 +89,16 @@ function MessageBar() {
                     //         },
                     //     },
                     // });
+                } else if (selectedChatType === 'channel') {
+                    socket?.emit('sendChannelMessage', {
+                        sender: userInfo?.id,
+                        content: message,
+                        messageType: 'text',
+                        fileUrl: undefined,
+                        channelId: selectedChatData?.id
+                    });
                 }
+                setMessage("");
             }
         } catch (err) {
             console.error('Failed to send/update message:', err);
@@ -170,14 +179,23 @@ function MessageBar() {
             //         },
             //     },
             // });
-
-            socket?.emit('sendMessage', {
-                sender: userInfo?.id,
-                recipient: selectedChatData.id,
-                messageType,
-                fileUrl,
-                content: '',
-            });
+            if (selectedChatType === 'contact') {
+                socket?.emit('sendMessage', {
+                    sender: userInfo?.id,
+                    recipient: selectedChatData.id,
+                    messageType,
+                    fileUrl,
+                    content: '',
+                });
+            } else if (selectedChatType === 'channel') {
+                socket?.emit('sendChannelMessage', {
+                    sender: userInfo?.id,
+                    content: '',
+                    messageType,
+                    fileUrl,
+                    channelId: selectedChatData.id
+                });
+            }
 
             toast.success(`${messageType} uploaded successfully`);
         } catch (err) {

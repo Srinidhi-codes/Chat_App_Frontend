@@ -95,7 +95,6 @@ export default function ProfilePage() {
 
             return assetUrl;
         } catch (error) {
-            console.error(error);
             toast.error('Failed to upload asset');
             return null;
         }
@@ -164,7 +163,6 @@ export default function ProfilePage() {
             }
 
         } catch (error) {
-            console.log(error);
             setIsUploading(false);
         }
     };

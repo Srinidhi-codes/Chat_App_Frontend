@@ -17,6 +17,7 @@ const ContactList = ({ isChannel }) => {
         removeContact,
         removeChannel,
         selectedChatType,
+        setIsChatOpen
     } = useAppStore();
     const { onlineUsers } = useSocket();
 
@@ -43,8 +44,8 @@ const ContactList = ({ isChannel }) => {
     const handleClick = (contact) => {
         const isAlreadySelected = selectedChatData?.id === contact?.id;
         setSelectedChatType(isChannel ? "channel" : "contact");
-
         if (!isAlreadySelected) {
+            setIsChatOpen(true)
             setSelectedChatMessages([]);
             setSelectedChatData(contact);
         }
@@ -54,6 +55,8 @@ const ContactList = ({ isChannel }) => {
     const handleRemoveContact = (id) => {
         isChannel ? removeChannel(id) : removeContact(id);
         setSelectedContactId(null);
+        setSelectedChatType("");
+        setSelectedChatData(null);
     };
 
     const handleContextOrLongPress = (e, id) => {
@@ -85,8 +88,7 @@ const ContactList = ({ isChannel }) => {
                                 e.currentTarget.addEventListener("touchmove", () => clearTimeout(timer), { once: true });
                             }}
                             className={`p-2 transition-all duration-300 cursor-pointer noselect rounded-3xl ${isSelected ? "bg-[#8417ff]" : "hover:bg-[#f1f1f111]"
-                                }`}
-                        >
+                                }`}>
                             <div className="flex gap-3 items-center justify-start text-neutral-300 relative">
                                 {!isChannel ? (
                                     <div className="relative">

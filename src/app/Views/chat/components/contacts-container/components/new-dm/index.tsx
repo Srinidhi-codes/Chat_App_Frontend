@@ -42,7 +42,7 @@ function NewDM() {
                 const { data } = await fetchSearchTerm({
                     variables: { searchTerm }
                 });
-                setSearchedContacts(data.searchContact || []);
+                setSearchedContacts(data?.searchContact || []);
             } catch (err) {
                 console.error('Error fetching contacts:', err);
                 setSearchedContacts([]);

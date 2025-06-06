@@ -19,3 +19,29 @@ export const GET_MESSAGES = gql`
     }
   }
 `;
+
+export const GET_CHANNEL_MESSAGES = gql`
+  query GetChannelMessages($input: GetChannelMessagesInput!) {
+    getChannelMessages(input: $input) {
+      id
+      content
+      messageType
+      fileUrl
+      createdAt
+      updatedAt
+      edited
+      reactions {
+      type
+      userId
+    }
+      sender {
+        id
+        firstName
+        lastName
+        email
+        image
+        color
+      }
+    }
+  }
+`;

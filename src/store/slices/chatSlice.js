@@ -13,6 +13,10 @@ export const createChatSlice = (set, get) => ({
     isOtherProfile: false,
     otherProfileData: null,
     onlineUsers: [],
+    isChatOpen: false,
+    refreshChat: 0,
+    setRefreshChat: (v) => set({ refreshChat: v }),
+
 
     setOnlineUsers: (updater) =>
         set((state) => ({
@@ -20,6 +24,7 @@ export const createChatSlice = (set, get) => ({
         })),
 
     setIsOtherProfile: (val) => set({ isOtherProfile: val }),
+    setIsChatOpen: (val) => set({ isChatOpen: val }),
     setOtherProfileData: (data) => set({ otherProfileData: data }),
 
 
@@ -135,7 +140,29 @@ export const createChatSlice = (set, get) => ({
             selectedChatData: undefined,
             selectedChatType: undefined,
             selectedChatMessages: [],
+            isChatOpen: false,
         }),
+
+    resetChatState: () =>
+        set({
+            selectedChatType: undefined,
+            selectedChatData: undefined,
+            selectedChatMessages: [],
+            directMessagesContacts: [],
+            isUploading: false,
+            isDownloading: false,
+            fileUploadProgress: 0,
+            fileDownloadProgress: 0,
+            channels: [],
+            removedChannelIds: [],
+            removedContactIds: [],
+            isOtherProfile: false,
+            otherProfileData: null,
+            onlineUsers: [],
+            isChatOpen: false,
+            refreshChat: 0,
+        }),
+
 
     addChannels: (channel) => {
         set((state) => {
@@ -152,8 +179,6 @@ export const createChatSlice = (set, get) => ({
             };
         });
     },
-
-
 
     addMessage: (message) => {
         set((state) => {
@@ -172,4 +197,28 @@ export const createChatSlice = (set, get) => ({
             return { selectedChatMessages: updatedMessages };
         });
     },
+    addChannelInChannelList: (message) => {
+        const channels = get().channels;
+        const data = channels.find((channel) => channel.id === message.channelId);
+        const index = channels.findIndex((channel) => channel.id === message.channelId)
+        if (index !== -1 && index !== undefined) {
+            channels.splice(index, 1);
+            channels.unshift(data);
+        }
+    },
+    addContactsInDMContacts: (message) => {
+        const userId = get().userInfo.id;
+        const fromId = message.sender.id === userId ? message.recipient.id : message.sender.id;
+        const fromData = message.sender.id === userId ? message.recipient : message.sender;
+        const dmContacts = get().directMessagesContacts;
+        const data = dmContacts.find((contact) => contact.id === fromId);
+        const index = dmContacts.findIndex((contact) => contact.id === fromId);
+        if (index !== -1 && index !== undefined) {
+            dmContacts.splice(index, 1);
+            dmContacts.unshift(data);
+        } else {
+            dmContacts.unshift(fromData);
+        }
+        set({ directMessagesContacts: dmContacts });
+    }
 });

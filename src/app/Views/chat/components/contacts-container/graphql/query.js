@@ -1,19 +1,19 @@
 import { gql } from '@apollo/client';
 
 export const GET_SEARCH_TERM = gql`
-query SearchUsers($searchTerm: String!) {
-  searchContact(input: { searchTerm: $searchTerm }) {
-    id
-    firstName
-    lastName
-    email
-    image
+  query SearchUsers($searchTerm: String!) {
+    searchContact(input: { searchTerm: $searchTerm }) {
+      id
+      firstName
+      lastName
+      email
+      image
+    }
   }
-}
 `;
 
 export const GET_CONTACTS_FOR_DM_LIST = gql`
-  query {
+  query GetContactsForDMList {
     getContactsForDMList {
       id
       firstName
@@ -25,6 +25,7 @@ export const GET_CONTACTS_FOR_DM_LIST = gql`
     }
   }
 `;
+
 
 export const GET_ALL_CONTACTS = gql`
   query GetAllContacts {

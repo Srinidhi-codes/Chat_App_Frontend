@@ -23,7 +23,6 @@ export default function Otp({ userDetails }: OtpProps) {
     const router = useRouter();
     const { setUserInfo } = useAppStore();
 
-    console.log(userDetails, "EMAIL")
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = +e.target.name;
         let value = e.target.value.replace(/\D/, "");

@@ -25,7 +25,7 @@ interface SocketProviderProps {
 export const SocketProvider = ({ children }: SocketProviderProps) => {
     const socketRef = useRef<Socket | null>(null);
     const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
-    const { userInfo, selectedChatMessages, setSelectedChatMessages, selectedChatData, selectedChatType, addMessage } = useAppStore();
+    const { userInfo, selectedChatMessages, setSelectedChatMessages, selectedChatData, selectedChatType, addMessage, addContactsInDMContacts } = useAppStore();
 
     useEffect(() => {
         if (userInfo) {
@@ -63,7 +63,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
             // Message handlers
             const handleReceiveMessage = (message: any) => {
-
                 if (
                     selectedChatType !== undefined &&
                     (selectedChatData?.id === message?.sender?.id ||
@@ -71,6 +70,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 ) {
                     addMessage(message);
                 }
+                addContactsInDMContacts(message)
             };
 
             // SocketProvider: Change handleEditMessage to functional update
@@ -127,16 +127,27 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 );
             };
 
+            const handleReceiveChannelMessage = async (message: any) => {
+                const { selectedChatData, selectedChatType, addMessage, addChannelInChannelList } = useAppStore.getState();
+                if (selectedChatType !== undefined && selectedChatData?.id === message?.channelId) {
+                    addMessage(message);
+                }
+                addChannelInChannelList(message);
+            }
+
             socket.on('receiveMessage', handleReceiveMessage);
             socket.on('messageEdited', handleEditMessage);
             socket.on('messageDeleted', handleDeleteMessage);
             socket.on('messageReactionUpdated', updateMessageReaction);
+            socket.on('receiveChannelMessage', handleReceiveChannelMessage);
+
 
             return () => {
                 socket.off('receiveMessage', handleReceiveMessage);
                 socket.off('messageEdited', handleEditMessage);
                 socket.off('messageDeleted', handleDeleteMessage);
                 socket.off('messageReactionUpdated', updateMessageReaction);
+                socket.off('receiveChannelMessage', handleReceiveChannelMessage);
                 socket.off('onlineUsers');
                 socket.off('userOnline');
                 socket.off('userOffline');
