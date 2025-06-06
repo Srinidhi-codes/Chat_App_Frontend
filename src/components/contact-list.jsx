@@ -126,7 +126,7 @@ const ContactList = ({ isChannel }) => {
                                         ) : (<span className="absolute bottom-0 right-1  h-2.5 w-2.5 bg-gray-500 border border-white rounded-full" />)}
                                     </div>
                                 ) : (
-                                    <div className={`${theme === 'dark' ? 'text-white bg-[#ffffff22]' : 'text-white bg-gray-700'}  h-10 w-12 flex items-center justify-center overflow-hidden rounded-full`}>
+                                    <div className={`${theme === 'dark' ? 'text-white bg-[#ffffff22]' : 'text-white bg-gray-700'}  h-10 w-13 flex items-center justify-center overflow-hidden rounded-full`}>
                                         #
                                     </div>
                                 )}

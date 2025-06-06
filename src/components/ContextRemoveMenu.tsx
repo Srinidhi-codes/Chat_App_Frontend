@@ -12,7 +12,7 @@ interface ContextMenuProps {
 const ContextRemoveMenu: React.FC<ContextMenuProps> = ({ x, y, onDelete, onCancel }) => {
     return (
         <div
-            className="bg-[#2c2e3b] text-white rounded-md shadow p-2 w-[10rem] z-50"
+            className="bg-[#2c2e3b] text-white rounded-md shadow p-2 w-[10rem] z-50 noselect"
             style={{
                 position: "fixed",
                 top: `${y}px`,

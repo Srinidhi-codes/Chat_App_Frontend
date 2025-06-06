@@ -25,7 +25,7 @@ const ContextEditMenu: React.FC<ContextMenuProps> = ({
     return (
         <div
             style={{ top: y, left: x - 90, position: 'absolute' }}
-            className="z-50 bg-[#2c2e3b] text-white text-left rounded-md shadow-md px-4 py-2"
+            className="z-50 bg-[#2c2e3b] text-white text-left rounded-md shadow-md px-4 py-2 noselect"
         >
             {isUserMessage && (
                 <div

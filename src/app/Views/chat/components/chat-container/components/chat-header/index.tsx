@@ -14,8 +14,15 @@ function ChatHeader() {
         selectedChatData?.id != null &&
         onlineUsers.includes(String(selectedChatData.id));
 
+    const channelOnlineCount = selectedChatType === 'channel' && selectedChatData?.members
+        ? selectedChatData.members.filter((id: any) => onlineUsers.includes(String(id))).length
+        : 0;
+
+    const totalChannelMembers = selectedChatData?.members?.length || 0;
+
+
     return (
-        <div className={`h-[10vh] border-b-2 border-[#2f303b] flex justify-between md:px-10 px-2 items-center ${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white'}`}>
+        <div className={`h-[10vh] border-b-2 border-[#2f303b] flex justify-between md:px-10 px-2 items-center ${theme === 'dark' ? 'text-white bg-[#ffffff22]' : 'text-black bg-white'}`}>
             <div className="flex gap-5 items-center w-full justify-between">
                 <div className="flex gap-3 min-w-fit items-center justify-center cursor-pointer" onClick={() => {
                     setIsOtherProfile(true);
@@ -23,12 +30,9 @@ function ChatHeader() {
                     router.push("/profile");
                 }}>
                     <div className="w-12 h-12 relative">
-                        {selectedChatType == 'channel' ?
-                            <div className="flex items-center gap-6 w-[10rem]">
-                                <div className="bg-[#ffffff22] h-10 w-10 flex items-center justify-center overflow-hidden rounded-full">
-                                    #
-                                </div>
-                                <p className="text-sm">{selectedChatData?.name}</p>
+                        {selectedChatType === 'channel' ?
+                            <div className={`${theme === 'dark' ? 'text-white bg-[#ffffff22]' : 'text-white bg-gray-700'}  h-10 w-10 flex items-center justify-center overflow-hidden rounded-full`}>
+                                #
                             </div>
                             :
                             <Avatar className="h-12 w-12 rounded-full overflow-hidden">
@@ -51,21 +55,36 @@ function ChatHeader() {
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm font-medium">
-                            {selectedChatType === 'contact' && selectedChatData?.firstName && selectedChatData?.lastName
+                            {selectedChatType === 'contact' ? selectedChatData?.firstName && selectedChatData?.lastName
                                 ? `${selectedChatData.firstName} ${selectedChatData.lastName}`
-                                : selectedChatData?.email}
+                                : selectedChatData?.email : selectedChatData?.name}
                         </span>
-                        {isOnline ?
-                            <div className="flex items-center gap-1">
-                                <span className="h-2.5 w-2.5 bg-green-500 border border-white rounded-full"></span>
-                                <span className="text-xs font-medium text-green-500">Online</span>
-                            </div>
-                            :
-                            <div className="flex items-center gap-2">
-                                <span className=" h-2.5 w-2.5 bg-gray-500 border border-white rounded-full"></span>
-                                <span className="text-xs font-medium text-gray-500">Offline</span>
-                            </div>
-                        }
+
+                        {selectedChatType === 'contact' ? (
+                            isOnline ? (
+                                <div className="flex items-center gap-1">
+                                    <span className="h-2.5 w-2.5 bg-green-500 border border-white rounded-full"></span>
+                                    <span className="text-xs font-medium text-green-500">Online</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1">
+                                    <span className="h-2.5 w-2.5 bg-gray-500 border border-white rounded-full"></span>
+                                    <span className="text-xs font-medium text-gray-500">Offline</span>
+                                </div>
+                            )
+                        ) : (
+                            channelOnlineCount > 0 ? (
+                                <div className="flex items-center gap-1">
+                                    <span className="h-2.5 w-2.5 bg-green-500 border border-white rounded-full"></span>
+                                    <span className="text-xs font-medium text-green-500">{channelOnlineCount} Online</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-1">
+                                    <span className="h-2.5 w-2.5 bg-gray-500 border border-white rounded-full"></span>
+                                    <span className="text-xs font-medium text-gray-500">{totalChannelMembers} Offline</span>
+                                </div>
+                            )
+                        )}
                     </div>
                 </div>
                 <div className="flex items-center justify-center gap-5">

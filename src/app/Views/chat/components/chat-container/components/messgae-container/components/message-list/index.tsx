@@ -26,6 +26,7 @@ const MessageListWithItems = () => {
     const [activeEmojiPickerId, setActiveEmojiPickerId] = useState<string | null>(null);
     const [emojiPickerPosition, setEmojiPickerPosition] = useState<'top' | 'bottom'>('top');
     const emojiButtonRef = useRef<HTMLButtonElement | null>(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
     const {
         selectedChatType,
         selectedChatData,
@@ -96,11 +97,19 @@ const MessageListWithItems = () => {
             fetchChannelMessages({ variables: { input: { channelId: selectedChatData.id } } });
         }
 
-        const handleClick = () => {
-            if (showOptions) setShowOptions(false);
+        const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowOptions(false);
+            }
         };
-        window.addEventListener('click', handleClick);
-        return () => window.removeEventListener('click', handleClick);
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside); // For mobile
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
     }, [selectedChatData?.id, selectedChatType]);
 
 
@@ -195,6 +204,7 @@ const MessageListWithItems = () => {
                         )}
 
                         <div
+                            ref={menuRef}
                             onContextMenu={(e) => {
                                 e.preventDefault();
                                 setSelectedMessageId(message.id);
