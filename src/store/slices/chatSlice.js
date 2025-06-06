@@ -15,6 +15,10 @@ export const createChatSlice = (set, get) => ({
     onlineUsers: [],
     isChatOpen: false,
     refreshChat: 0,
+    unreadCountsContacts: {},
+    unreadCountsChannels: {},
+
+
     setRefreshChat: (v) => set({ refreshChat: v }),
 
 
@@ -220,5 +224,76 @@ export const createChatSlice = (set, get) => ({
             dmContacts.unshift(fromData);
         }
         set({ directMessagesContacts: dmContacts });
-    }
+    },
+
+    incrementUnreadCountContact: (contactId) =>
+        set((state) => {
+            if (state.selectedChatType === 'contact' && state.selectedChatData?.id === contactId) {
+                // Chat is open, no increment
+                return {};
+            }
+            const prevCount = state.unreadCountsContacts[contactId] || 0;
+            return {
+                unreadCountsContacts: {
+                    ...state.unreadCountsContacts,
+                    [contactId]: prevCount + 1,
+                },
+            };
+        }),
+
+    resetUnreadCountContact: (contactId) =>
+        set((state) => ({
+            unreadCountsContacts: {
+                ...state.unreadCountsContacts,
+                [contactId]: 0,
+            },
+        })),
+
+    incrementUnreadCountChannel: (channelId) =>
+        set((state) => {
+            if (state.selectedChatType === 'channel' && state.selectedChatData?.id === channelId) {
+                return {};
+            }
+            const prevCount = state.unreadCountsChannels[channelId] || 0;
+            return {
+                unreadCountsChannels: {
+                    ...state.unreadCountsChannels,
+                    [channelId]: prevCount + 1,
+                },
+            };
+        }),
+
+    resetUnreadCountChannel: (channelId) =>
+        set((state) => ({
+            unreadCountsChannels: {
+                ...state.unreadCountsChannels,
+                [channelId]: 0,
+            },
+        })),
+
+    // Update setSelectedChatData to reset unread count on chat select
+    setSelectedChatData: (selectedChatData) => {
+        set((state) => {
+            if (!selectedChatData) return { selectedChatData: undefined };
+
+            if (state.selectedChatType === 'contact') {
+                return {
+                    selectedChatData,
+                    unreadCountsContacts: {
+                        ...state.unreadCountsContacts,
+                        [selectedChatData.id]: 0,
+                    },
+                };
+            } else if (state.selectedChatType === 'channel') {
+                return {
+                    selectedChatData,
+                    unreadCountsChannels: {
+                        ...state.unreadCountsChannels,
+                        [selectedChatData.id]: 0,
+                    },
+                };
+            }
+            return { selectedChatData };
+        });
+    },
 });

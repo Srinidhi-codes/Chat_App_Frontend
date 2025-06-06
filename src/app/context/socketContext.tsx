@@ -62,16 +62,16 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
             });
 
             // Message handlers
-            const handleReceiveMessage = (message: any) => {
-                if (
-                    selectedChatType !== undefined &&
-                    (selectedChatData?.id === message?.sender?.id ||
-                        selectedChatData?.id === message?.recipient?.id)
-                ) {
-                    addMessage(message);
-                }
-                addContactsInDMContacts(message)
-            };
+            // const handleReceiveMessage = (message: any) => {
+            //     if (
+            //         selectedChatType !== undefined &&
+            //         (selectedChatData?.id === message?.sender?.id ||
+            //             selectedChatData?.id === message?.recipient?.id)
+            //     ) {
+            //         addMessage(message);
+            //     }
+            //     addContactsInDMContacts(message)
+            // };
 
             // SocketProvider: Change handleEditMessage to functional update
             const handleEditMessage = (updatedMessage: any) => {
@@ -127,13 +127,39 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 );
             };
 
-            const handleReceiveChannelMessage = async (message: any) => {
-                const { selectedChatData, selectedChatType, addMessage, addChannelInChannelList } = useAppStore.getState();
-                if (selectedChatType !== undefined && selectedChatData?.id === message?.channelId) {
+            const handleReceiveMessage = (message: any) => {
+                const { selectedChatType, selectedChatData, addMessage, incrementUnreadCountContact } = useAppStore.getState();
+
+                // If message is for currently open contact chat, add message directly
+                if (
+                    selectedChatType === "contact" &&
+                    (selectedChatData?.id === message.sender?.id || selectedChatData?.id === message.recipient?.id)
+                ) {
                     addMessage(message);
+                } else {
+                    // Otherwise increment unread count for the other contact
+                    const otherUserId = message.sender?.id === useAppStore.getState().userInfo.id
+                        ? message.recipient?.id
+                        : message.sender?.id;
+                    incrementUnreadCountContact(otherUserId);
                 }
+
+                // Also update contacts list
+                useAppStore.getState().addContactsInDMContacts(message);
+            };
+
+            const handleReceiveChannelMessage = (message: any) => {
+                const { selectedChatData, selectedChatType, addMessage, addChannelInChannelList, incrementUnreadCountChannel } = useAppStore.getState();
+
+                if (selectedChatType === "channel" && selectedChatData?.id === message.channelId) {
+                    addMessage(message);
+                } else {
+                    incrementUnreadCountChannel(message.channelId);
+                }
+
                 addChannelInChannelList(message);
-            }
+            };
+
 
             socket.on('receiveMessage', handleReceiveMessage);
             socket.on('messageEdited', handleEditMessage);

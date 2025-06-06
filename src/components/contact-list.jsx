@@ -20,6 +20,9 @@ const ContactList = ({ isChannel }) => {
         setIsChatOpen
     } = useAppStore();
     const { onlineUsers } = useSocket();
+    const unreadCountsContacts = useAppStore((state) => state.unreadCountsContacts);
+    const unreadCountsChannels = useAppStore((state) => state.unreadCountsChannels);
+
 
     const [selectedContactId, setSelectedContactId] = useState(null);
     const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -76,6 +79,9 @@ const ContactList = ({ isChannel }) => {
                     const isSelected = selectedChatData?.id === contact?.id;
                     const showOptions = selectedContactId === contact?.id;
                     const isOnline = !isChannel && onlineUsers.includes(contact.id);
+                    const unreadCount = isChannel
+                        ? unreadCountsChannels[contact.id] || 0
+                        : unreadCountsContacts[contact.id] || 0;
 
                     return (
                         <div
@@ -128,6 +134,11 @@ const ContactList = ({ isChannel }) => {
                                             ? contact.name
                                             : `${contact.firstName} ${contact.lastName}`}
                                     </span>
+                                    {unreadCount > 0 && (
+                                        <span className="ml-2 inline-flex items-center justify-center px-1 py-0.5 text-xs font-bold leading-none text-black bg-white rounded-full">
+                                            {unreadCount}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
 
