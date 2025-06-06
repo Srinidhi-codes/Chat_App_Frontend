@@ -17,7 +17,8 @@ const ContactList = ({ isChannel }) => {
         removeContact,
         removeChannel,
         selectedChatType,
-        setIsChatOpen
+        setIsChatOpen,
+        theme
     } = useAppStore();
     const { onlineUsers } = useSocket();
     const unreadCountsContacts = useAppStore((state) => state.unreadCountsContacts);
@@ -93,8 +94,11 @@ const ContactList = ({ isChannel }) => {
                                 e.currentTarget.addEventListener("touchend", () => clearTimeout(timer), { once: true });
                                 e.currentTarget.addEventListener("touchmove", () => clearTimeout(timer), { once: true });
                             }}
-                            className={`p-2 transition-all duration-300 cursor-pointer noselect rounded-3xl ${isSelected ? "bg-[#8417ff]" : "hover:bg-[#f1f1f111]"
-                                }`}>
+                            className={`p-2 transition-all duration-300 cursor-pointer noselect rounded-3xl ${isSelected
+                                ? theme !== 'dark'
+                                    ? "bg-[#d9b8ff]"
+                                    : "bg-[#8417ff]"
+                                : "hover:bg-[#f1f1f111]"} `}>
                             <div className="flex gap-3 items-center justify-start text-neutral-300 relative">
                                 {!isChannel ? (
                                     <div className="relative">
@@ -107,10 +111,9 @@ const ContactList = ({ isChannel }) => {
                                                 />
                                             ) : (
                                                 <div
-                                                    className={`uppercase h-10 w-10 text-lg border flex items-center justify-center rounded-full ${isSelected
+                                                    className={`uppercase h-10 w-10 text-lg border flex items-center justify-center rounded-full ${theme === 'dark' ? 'text-white' : 'text-black'} ${isSelected
                                                         ? "bg-[#ffffff22] border-2 border-white/50"
-                                                        : getColor(contact?.color)
-                                                        }`}
+                                                        : getColor(contact?.color)}`}
                                                 >
                                                     {contact?.firstName?.charAt(0) ||
                                                         contact?.email?.charAt(0)}
@@ -123,19 +126,19 @@ const ContactList = ({ isChannel }) => {
                                         ) : (<span className="absolute bottom-0 right-1  h-2.5 w-2.5 bg-gray-500 border border-white rounded-full" />)}
                                     </div>
                                 ) : (
-                                    <div className="bg-[#ffffff22] h-10 w-12 flex items-center justify-center overflow-hidden rounded-full">
+                                    <div className={`${theme === 'dark' ? 'text-white bg-[#ffffff22]' : 'text-white bg-gray-700'}  h-10 w-12 flex items-center justify-center overflow-hidden rounded-full`}>
                                         #
                                     </div>
                                 )}
 
                                 <div className="flex justify-between items-center w-full pr-4">
-                                    <span className="text-sm font-medium text-white">
+                                    <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
                                         {isChannel
                                             ? contact.name
                                             : `${contact.firstName} ${contact.lastName}`}
                                     </span>
                                     {unreadCount > 0 && (
-                                        <span className="ml-2 inline-flex items-center justify-center px-1 py-0.5 text-xs font-bold leading-none text-black bg-white rounded-full">
+                                        <span className="ml-2 inline-flex items-center justify-center px-1 py-0.5 text-xs font-bold leading-none text-white bg-blue-500 rounded-full">
                                             {unreadCount}
                                         </span>
                                     )}
@@ -153,7 +156,7 @@ const ContactList = ({ isChannel }) => {
                         </div>
                     );
                 })}
-        </div>
+        </div >
     );
 };
 

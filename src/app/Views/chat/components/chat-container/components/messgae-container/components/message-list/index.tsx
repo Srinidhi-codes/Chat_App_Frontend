@@ -34,7 +34,8 @@ const MessageListWithItems = () => {
         setSelectedChatMessages,
         setFileDownloadProgress,
         setIsDownloading,
-        isChatOpen
+        isChatOpen,
+        theme
     } = useAppStore();
 
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -46,6 +47,8 @@ const MessageListWithItems = () => {
     const [optionsPosition, setOptionsPosition] = useState({ x: 0, y: 0 });
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
+    const longPressTimeout = useRef<number | null>(null);
+
     const [fetchMessages, { data: fetchedMessages }] = useLazyQuery(GET_MESSAGES, {
         fetchPolicy: 'network-only',
     });
@@ -93,11 +96,11 @@ const MessageListWithItems = () => {
             fetchChannelMessages({ variables: { input: { channelId: selectedChatData.id } } });
         }
 
-        // const handleClick = () => {
-        //     if (showOptions) setShowOptions(false);
-        // };
-        // window.addEventListener('click', handleClick);
-        // return () => window.removeEventListener('click', handleClick);
+        const handleClick = () => {
+            if (showOptions) setShowOptions(false);
+        };
+        window.addEventListener('click', handleClick);
+        return () => window.removeEventListener('click', handleClick);
     }, [selectedChatData?.id, selectedChatType]);
 
 
@@ -180,8 +183,8 @@ const MessageListWithItems = () => {
                 const isSender = message.senderId === userInfo?.id;
 
                 const messageClass = isSender
-                    ? 'bg-[#8417ff]/5 text-[#8417ff] border-[#8417ff]/50 text-left'
-                    : 'bg-[#2a2b33]/5 text-white/80 border-white/50';
+                    ? `${theme === 'dark' ? 'text-[#8417ff] bg-[#8417ff]/5' : 'text-black bg-[#8417ff]/5'} border-[#8417ff]/50 text-left`
+                    : `${theme === 'dark' ? 'text-white/80 bg-[#2a2b33]/5' : 'text-black bg-gray-50'} border`;
 
                 return (
                     <div key={message.id} className={`my-1 ${isSender ? 'text-right' : 'text-left'}`}>
@@ -198,6 +201,20 @@ const MessageListWithItems = () => {
                                 setShowOptions(true);
                                 setOptionsPosition({ x: e.clientX, y: e.clientY });
                             }}
+                            onTouchStart={(e) => {
+                                const touch = e.touches[0];
+                                longPressTimeout.current = window.setTimeout(() => {
+                                    setSelectedMessageId(message.id);
+                                    setShowOptions(true);
+                                    setOptionsPosition({ x: touch.clientX, y: touch.clientY });
+                                }, 500);
+                            }}
+                            onTouchEnd={() => {
+                                if (longPressTimeout.current !== null) {
+                                    clearTimeout(longPressTimeout.current);
+                                }
+                            }}
+
                         >
                             {showOptions && selectedMessageId === message.id && (
                                 <ContextEditMenu

@@ -142,8 +142,7 @@ const MessageItem: React.FC<MessageItemProps> = ({
             ) : (
                 <>
                     <div
-                        className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-[1.025rem] ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'
-                            }`}
+                        className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-[1.025rem] ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'}`}
                     >
 
                         {message.content}

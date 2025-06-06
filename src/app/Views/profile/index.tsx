@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function ProfilePage() {
-    const { userInfo, setUserInfo, isOtherProfile, otherProfileData, setIsOtherProfile, setFileUploadProgress, setIsUploading, } = useAppStore();
+    const { userInfo, setUserInfo, isOtherProfile, otherProfileData, setIsOtherProfile, setFileUploadProgress, setIsUploading, theme } = useAppStore();
     const router = useRouter();
 
     const [userData, setUserData] = useState({
@@ -172,10 +172,10 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="bg-[#353746] md:h-[100vh] h-[100dvh] flex items-center justify-center flex-col gap-10">
+        <div className={`${theme === 'dark' ? 'text-white bg-[#353746]' : 'text-black bg-white border-t'} md:h-[100vh] h-[100dvh] flex items-center justify-center flex-col gap-10`}>
             <div className="flex flex-col gap-10 w-[80vw] md:w-max">
                 <div>
-                    <IoArrowBack onClick={handleNavigate} className="text-2xl lg:text-6xl text-white/90 cursor-pointer hover:-translate-x-5 duration-300 transition-all" />
+                    <IoArrowBack onClick={handleNavigate} className={`text-2xl lg:text-6xl cursor-pointer ${theme === 'dark' ? 'text-white' : 'text-black'}`} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
                     {/* Avatar Section */}
@@ -225,7 +225,7 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Form Section */}
-                    <div className="w-[15rem] flex flex-col gap-4 md:gap-5 text-white items-center justify-center">
+                    <div className="w-[15rem] flex flex-col gap-4 md:gap-5 items-center justify-center">
                         <Input
                             placeholder="Email"
                             type="email"
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                             value={userData.firstName}
                             readOnly={isOtherProfile}
                             onChange={handleChange}
-                            className="rounded-lg p-4 md:p-6 bg-[#2c2e3b] border-none w-full"
+                            className="rounded-lg p-4 md:p-6 w-full"
                         />
                         <Input
                             placeholder="Last Name"
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                             value={userData.lastName}
                             readOnly={isOtherProfile}
                             onChange={handleChange}
-                            className="rounded-lg p-4 md:p-6 bg-[#2c2e3b] border-none w-full capitalize"
+                            className="rounded-lg p-4 md:p-6 w-full capitalize"
                         />
                         {!isOtherProfile && <div className="w-full flex gap-4 flex-wrap justify-center md:justify-start">
                             {colors?.map((color, index) => (

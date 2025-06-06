@@ -19,7 +19,8 @@ function ProfileInfo() {
     const {
         userInfo,
         setUserInfo,
-        resetChatState
+        resetChatState,
+        theme
     } = useAppStore();
 
     const router = useRouter();
@@ -43,7 +44,7 @@ function ProfileInfo() {
     };
 
     return (
-        <div className='absolute bottom-0 h-16 flex items-center justify-between px-10 w-full bg-[#2a2b33]'>
+        <div className={`absolute bottom-0 h-[10.5%] flex items-center justify-between px-10 w-full ${theme === 'dark' ? 'text-white bg-[#ffffff22]' : 'text-black bg-gray-50 border-t'}`}>
             <div
                 className="flex gap-5 items-center justify-center cursor-pointer"
                 onClick={() => router.push('/profile')}
@@ -68,7 +69,7 @@ function ProfileInfo() {
                         )}
                     </Avatar>
                 </div>
-                <div className='transition-transform duration-200 hover:translate-y-[3px] text-white'>
+                <div className='transition-transform duration-200 hover:translate-y-[3px]'>
                     {userInfo?.firstName && userInfo?.lastName
                         ? `${userInfo.firstName} ${userInfo.lastName}`
                         : ""}
@@ -82,10 +83,10 @@ function ProfileInfo() {
                             <LuLogOut
                                 onClick={logout}
                                 className={clsx(
-                                    'cursor-pointer text-xl font-medium text-white transition-transform duration-200 hover:translate-x-1',
+                                    'cursor-pointer text-xl font-medium text-red-500',
                                     {
                                         'opacity-50 pointer-events-none': loading,
-                                        'hover:text-red-500': !loading
+                                        'hover:text-red-300': !loading
                                     }
                                 )}
                             />

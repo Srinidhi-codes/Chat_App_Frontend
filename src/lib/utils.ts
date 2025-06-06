@@ -22,6 +22,6 @@ export const getColor = (colorIndex: number) => {
 
 export const animationDefaultOptions = {
   loop: true,
-  autoPlay: true,
+  autoplay: true,
   animationData
 }

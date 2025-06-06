@@ -17,10 +17,11 @@ import MessageListWithItems from './components/message-list';
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, { transports: ['websocket'] });
 
 function MessageContainer() {
+    const { theme } = useAppStore();
 
     return (
         <div
-            className='flex-1 overflow-y-auto scrollbar-hidden p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full'
+            className={`flex-1 overflow-y-auto scrollbar-hidden p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full ${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white'}`}
         >
             <MessageListWithItems
             // messages={selectedChatMessages}
@@ -50,7 +51,7 @@ function MessageContainer() {
             //     setImageUrl(url);
             // }}
             />
-            
+
         </div>
     );
 }

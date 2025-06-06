@@ -25,6 +25,7 @@ function MessageBar() {
         userInfo,
         setIsUploading,
         setFileUploadProgress,
+        theme
     } = useAppStore();
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ['websocket'] });
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -221,8 +222,8 @@ function MessageBar() {
 
 
     return (
-        <div className="h-auto min-h-[10vh] bg-[#1c1d25] flex justify-center items-center px-4 py-2 gap-4 md:gap-6">
-            <div className="w-full md:flex-1 flex bg-[#2a2b33] rounded-md items-center gap-3 md:gap-5 pr-3 md:pr-5">
+        <div className={`h-auto min-h-[10vh] ${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white border-t'} flex justify-center items-center px-4 py-2 gap-4 md:gap-6`}>
+            <div className={`w-full md:flex-1 flex ${theme === 'dark' ? 'text-white bg-[#2a2b33]' : 'text-black bg-white border'} rounded-md items-center gap-3 md:gap-5 pr-3 md:pr-5`}>
                 {editingMessageId && (
                     <div className="text-xs text-gray-400 italic px-3 pt-2 flex justify-between items-center">
                         <span>Editing message...</span>
@@ -254,7 +255,7 @@ function MessageBar() {
                 <Button
                     type="button"
                     onClick={handleAttachmentClick}
-                    className="text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none"
+                    className={`${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white border'} text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none`}
                 >
                     <GrAttachment className="text-xl md:text-2xl" />
                 </Button>
@@ -269,7 +270,7 @@ function MessageBar() {
                     <Button
                         type="button"
                         onClick={() => setEmojiPickerOpen(!emojiPickerOpen)}
-                        className="text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none"
+                        className={`${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white border'} text-neutral-500 cursor-pointer hover:text-white transition-colors duration-300 outline-none focus:outline-none`}
                     >
                         <RiEmojiStickerLine className="text-xl md:text-2xl" />
                     </Button>
@@ -279,7 +280,7 @@ function MessageBar() {
                             ref={emojiRef}
                         >
                             <EmojiPicker
-                                theme={'dark' as Theme}
+                                theme={theme === 'dark' ? ('dark' as Theme) : ('light' as Theme)}
                                 open={emojiPickerOpen}
                                 onEmojiClick={handleAddEmoji}
                                 autoFocusSearch={false}

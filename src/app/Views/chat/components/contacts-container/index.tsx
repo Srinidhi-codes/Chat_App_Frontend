@@ -7,11 +7,13 @@ import { useAppStore } from "@/store";
 import ContactList from "@/components/contact-list"
 import CreateChannel from "./components/create-channel";
 import Image from "next/image";
+import { Switch } from "@/components/ui/switch";
 
 const ContactsContainer = () => {
     const [fetchContactsForDMList, { data: fetchedContactsForDMList }] = useLazyQuery(GET_CONTACTS_FOR_DM_LIST);
     const [fetchUserChannels, { data: fetchedUserChannels }] = useLazyQuery(GET_USER_CHANNELS);
-    const { setDirectMessagesContacts, directMessagesContacts, channels, setChannels } = useAppStore();
+    const { setDirectMessagesContacts, directMessagesContacts, channels, setChannels, theme, setTheme } = useAppStore();
+    const isDark = theme === 'dark';
     // Fetch on mount
     useEffect(() => {
         fetchContactsForDMList()
@@ -29,10 +31,19 @@ const ContactsContainer = () => {
     }, [fetchedContactsForDMList, setDirectMessagesContacts, fetchedUserChannels, setChannels])
 
     return (
-        <div className="relative flex flex-col items-start md:w-[35vw] lg:w-[30vw] xl:w-[20vw] bg-[#1b1c24] border-r-2 border-[#2f303b] w-full">
+        <div className={`relative flex flex-col items-start md:w-[35vw] lg:w-[30vw] xl:w-[20vw] ${theme === 'dark' ? 'bg-[#1b1c24] text-white' : 'bg-white text-black'} transition-all border-r-2 border-[#2f303b] w-full`}>
             <div className="p-3 flex gap-4 items-center justify-center w-full">
                 <Image className="h-[3.5rem] w-[3.5rem] rounded-[35%]" src={'/logo.svg'} alt="Logo" height={100} width={100} />
-                <span className='text-purple-500 text-xl md:text-3xl animate-glow'>Connectify</span>
+                <span className="text-3xl font-semibold md:text-3xl bg-gradient-to-r from-sky-500 to-green-500 bg-clip-text text-transparent animate-glow">
+                    Connectify
+                </span>
+                <div className={`absolute right-2 top-5 rounded-md flex items-center gap-2 p-2 ${isDark ? 'bg-gray-50' : 'bg-black'} md:hidden`} >
+                    <Switch
+                        className={isDark ? 'bg-white' : 'bg-black'}
+                        checked={isDark}
+                        onCheckedChange={() => setTheme(isDark ? 'light' : 'dark')}
+                    />
+                </div>
             </div>
             <div className="my-5 w-full">
                 <div className="flex items-center justify-between pr-10 gap-5">
@@ -59,7 +70,7 @@ const ContactsContainer = () => {
                     </div>}
             </div>
             <ProfileInfo />
-        </div>
+        </div >
     )
 }
 
