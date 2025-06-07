@@ -23,34 +23,7 @@ function MessageContainer() {
         <div
             className={`flex-1 overflow-y-auto scrollbar-hidden p-4 px-8 md:w-[65vw] lg:w-[70vw] xl:w-[80vw] w-full ${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white'}`}
         >
-            <MessageListWithItems
-            // messages={selectedChatMessages}
-            // userId={userInfo?.id}
-            // selectedChatType={selectedChatType}
-            // selectedMessageId={selectedMessageId}
-            // showOptions={showOptions}
-            // optionsPosition={optionsPosition}
-            // editingMessageId={editingMessageId}
-            // editingMessageText={editingMessageText}
-            // setEditingMessageId={setEditingMessageId}
-            // setEditingMessageText={setEditingMessageText}
-            // setSelectedMessageId={setSelectedMessageId}
-            // setShowOptions={setShowOptions}
-            // setOptionsPosition={setOptionsPosition}
-            // handleEditMessage={handleEditMessage}
-            // handleSaveEditedMessage={handleSaveEditedMessage}
-            // handleRemoveMessage={handleRemoveMessage}
-            // handleReactToMessage={handleReactToMessage}
-            // onCopy={(text) => {
-            //     if (text) navigator.clipboard.writeText(text);
-            //     toast.success('Copied to clipboard!');
-            // }}
-            // onDownloadFile={downloadFile}
-            // onShowImage={(url) => {
-            //     setShowImage(true);
-            //     setImageUrl(url);
-            // }}
-            />
+            <MessageListWithItems />
 
         </div>
     );

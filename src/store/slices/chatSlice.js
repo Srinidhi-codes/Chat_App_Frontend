@@ -17,6 +17,12 @@ export const createChatSlice = (set, get) => ({
     refreshChat: 0,
     unreadCountsContacts: {},
     unreadCountsChannels: {},
+    editingMessageId: null,
+    editingMessageContent: '',
+    setEditingMessage: (id, content) => {
+        set({ editingMessageId: id, editingMessageContent: content });
+    },
+
 
 
     setRefreshChat: (v) => set({ refreshChat: v }),

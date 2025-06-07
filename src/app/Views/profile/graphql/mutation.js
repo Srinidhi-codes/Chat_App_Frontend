@@ -10,6 +10,7 @@ export const UPDATE_USER_INFO = gql`
     image
     profileSetup
     color
+    theme
   }
 }
 `;

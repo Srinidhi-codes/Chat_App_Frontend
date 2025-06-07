@@ -1,18 +1,23 @@
 import { useEffect } from "react"
 import NewDM from "./components/new-dm"
 import ProfileInfo from "./components/profile-info"
-import { useLazyQuery } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
 import { GET_CONTACTS_FOR_DM_LIST, GET_USER_CHANNELS } from './graphql/query';
 import { useAppStore } from "@/store";
 import ContactList from "@/components/contact-list"
 import CreateChannel from "./components/create-channel";
 import Image from "next/image";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { UPDATE_USER_INFO } from "@/app/Views/profile/graphql/mutation";
 
 const ContactsContainer = () => {
     const [fetchContactsForDMList, { data: fetchedContactsForDMList }] = useLazyQuery(GET_CONTACTS_FOR_DM_LIST);
     const [fetchUserChannels, { data: fetchedUserChannels }] = useLazyQuery(GET_USER_CHANNELS);
-    const { setDirectMessagesContacts, directMessagesContacts, channels, setChannels, theme, setTheme } = useAppStore();
+    const { setDirectMessagesContacts, directMessagesContacts, channels, setChannels, theme, setTheme, userInfo, setUserInfo } = useAppStore();
+    const [updateUserInfo] = useMutation(UPDATE_USER_INFO);
+
+
     const isDark = theme === 'dark';
     // Fetch on mount
     useEffect(() => {
@@ -30,6 +35,36 @@ const ContactsContainer = () => {
         }
     }, [fetchedContactsForDMList, setDirectMessagesContacts, fetchedUserChannels, setChannels])
 
+    const saveChanges = async () => {
+        const newTheme = isDark ? 'light' : 'dark';
+
+        try {
+            setTheme(newTheme);
+
+            const { firstName, lastName, color, image } = userInfo;
+            const { data } = await updateUserInfo({
+                variables: {
+                    input: {
+                        firstName,
+                        lastName,
+                        color,
+                        image,
+                        theme: newTheme,
+                    },
+                },
+            });
+
+            if (data?.updateUserInfo) {
+                setUserInfo(data.updateUserInfo);
+                toast.success('Updated Theme Preference Successfully');
+            } else {
+                toast.error('Something went wrong: No data returned');
+            }
+        } catch (error: any) {
+            toast.error(error?.message || 'Unexpected error');
+        }
+    };
+
     return (
         <div className={`relative flex flex-col items-start md:w-[35vw] lg:w-[30vw] xl:w-[20vw] ${theme === 'dark' ? 'bg-[#1b1c24] text-white' : 'bg-white text-black'} transition-all border-r-2 border-[#2f303b] w-full`}>
             <div className="p-3 flex gap-4 items-center justify-center w-full">
@@ -41,7 +76,7 @@ const ContactsContainer = () => {
                     <Switch
                         className={isDark ? 'bg-white' : 'bg-black'}
                         checked={isDark}
-                        onCheckedChange={() => setTheme(isDark ? 'light' : 'dark')}
+                        onCheckedChange={saveChanges}
                     />
                 </div>
             </div>

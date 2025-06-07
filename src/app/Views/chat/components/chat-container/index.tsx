@@ -4,7 +4,7 @@ import MessageConatiner from "./components/messgae-container"
 
 const ChatContainer = () => {
     return (
-        <div className="fixed top-0 md:h-[100vh] h-[100dvh] md:w-[100vw] w-[100dvw]  bg-[#1c1d25] flex flex-col md:static md:flex-1">
+        <div className="fixed top-0 inset-0 md:static md:flex-1 bg-[#1c1d25] flex flex-col h-[100dvh] overflow-hidden">
             <ChatHeader />
             <MessageConatiner />
             <MessageBar />

@@ -35,12 +35,10 @@ const MessageListWithItems = () => {
         setSelectedChatMessages,
         setFileDownloadProgress,
         setIsDownloading,
-        isChatOpen,
-        theme
+        theme,
+        setEditingMessage
     } = useAppStore();
 
-    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-    const [editingMessageText, setEditingMessageText] = useState('');
     const [showImage, setShowImage] = useState(false);
     const [imageURL, setImageUrl] = useState<string | null>(null);
     const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
@@ -48,7 +46,6 @@ const MessageListWithItems = () => {
     const [optionsPosition, setOptionsPosition] = useState({ x: 0, y: 0 });
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
-    const longPressTimeout = useRef<number | null>(null);
 
     const [fetchMessages, { data: fetchedMessages }] = useLazyQuery(GET_MESSAGES, {
         fetchPolicy: 'network-only',
@@ -57,6 +54,76 @@ const MessageListWithItems = () => {
         fetchPolicy: 'network-only',
     });
 
+    useEffect(() => {
+        if (selectedChatType === 'contact' && selectedChatData?.id) {
+            fetchMessages({ variables: { input: { senderId: selectedChatData.id } } });
+        } else if (selectedChatType === 'channel' && selectedChatData?.id) {
+            fetchChannelMessages({ variables: { input: { channelId: selectedChatData.id } } });
+        }
+    }, [selectedChatData?.id, selectedChatType]);
+
+    useEffect(() => {
+        const handleClick = () => {
+            if (showOptions) setShowOptions(false);
+        };
+        window.addEventListener('click', handleClick);
+        return () => window.removeEventListener('click', handleClick);
+    }, [showOptions])
+
+
+    useEffect(() => {
+        if (fetchedMessages?.getMessage) {
+            setSelectedChatMessages(fetchedMessages.getMessage);
+        }
+        if (fetchedChannelMessages?.getChannelMessages) {
+            setSelectedChatMessages(fetchedChannelMessages.getChannelMessages);
+        }
+    }, [fetchedMessages, fetchedChannelMessages]);
+
+    useEffect(() => {
+        scrollRef.current?.scrollIntoView({ behavior: 'auto' });
+    }, [selectedChatMessages, selectedChatData?.id]);
+
+    const handleEditMessage = (id: string, content: string, createdAt: string) => {
+        const now = new Date();
+        const created = new Date(createdAt);
+        const diff = now.getTime() - created.getTime();
+        const fiveMin = 5 * 60 * 1000;
+
+        if (diff > fiveMin) {
+            toast.warning('You can only edit messages within 5 minutes of sending.');
+            return;
+        }
+        setEditingMessage(id, content);
+    };
+
+    const handleRemoveMessage = (messageId: string) => {
+        console.log(messageId, "ID")
+        socket.emit('deleteMessage', { id: messageId });
+    };
+
+    const handleReactToMessage = (messageId: string, type: string) => {
+        socket.emit('reactToMessage', {
+            messageId,
+            userId: userInfo?.id,
+            type
+        });
+    };
+
+    const handleEmojiClick = (emojiData: any, messageId: string) => {
+        handleReactToMessage(messageId, emojiData.emoji);
+        setActiveEmojiPickerId(null);
+    };
+
+    const toggleEmojiPicker = (messageId: string) => {
+        if (emojiButtonRef.current) {
+            const rect = emojiButtonRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+            setEmojiPickerPosition(spaceBelow < 330 && spaceAbove > 330 ? 'top' : 'bottom');
+            setActiveEmojiPickerId((prev) => (prev === messageId ? null : messageId));
+        }
+    };
 
     const downloadFile = async (fileUrl: string) => {
         try {
@@ -87,93 +154,6 @@ const MessageListWithItems = () => {
         } finally {
             setIsDownloading(false);
             setFileDownloadProgress(0);
-        }
-    };
-
-    useEffect(() => {
-        if (selectedChatType === 'contact' && selectedChatData?.id) {
-            fetchMessages({ variables: { input: { senderId: selectedChatData.id } } });
-        } else if (selectedChatType === 'channel' && selectedChatData?.id) {
-            fetchChannelMessages({ variables: { input: { channelId: selectedChatData.id } } });
-        }
-
-        const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setShowOptions(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleClickOutside);
-        document.addEventListener('touchstart', handleClickOutside); // For mobile
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-            document.removeEventListener('touchstart', handleClickOutside);
-        };
-    }, [selectedChatData?.id, selectedChatType]);
-
-
-    useEffect(() => {
-        if (fetchedMessages?.getMessage) {
-            setSelectedChatMessages(fetchedMessages.getMessage);
-        }
-        if (fetchedChannelMessages?.getChannelMessages) {
-            setSelectedChatMessages(fetchedChannelMessages.getChannelMessages);
-        }
-    }, [fetchedMessages, fetchedChannelMessages]);
-
-    useEffect(() => {
-        scrollRef.current?.scrollIntoView({ behavior: 'auto' });
-    }, [selectedChatMessages, selectedChatData?.id]);
-
-    const handleEditMessage = (id: string, content: string, createdAt: string) => {
-        const now = new Date();
-        const created = new Date(createdAt);
-        const diff = now.getTime() - created.getTime();
-        const fiveMin = 5 * 60 * 1000;
-
-        if (diff > fiveMin) {
-            toast.warning('You can only edit messages within 5 minutes of sending.');
-            return;
-        }
-        setEditingMessageId(id);
-        setEditingMessageText(content);
-    };
-
-    const handleSaveEditedMessage = (messageId: string) => {
-        socket.emit('editMessage', {
-            id: messageId,
-            content: editingMessageText,
-            edited: true
-        });
-        setEditingMessageId(null);
-        setEditingMessageText('');
-    };
-
-    const handleRemoveMessage = (messageId: string) => {
-        socket.emit('deleteMessage', { id: messageId });
-    };
-
-    const handleReactToMessage = (messageId: string, type: string) => {
-        socket.emit('reactToMessage', {
-            messageId,
-            userId: userInfo?.id,
-            type
-        });
-    };
-
-    const handleEmojiClick = (emojiData: any, messageId: string) => {
-        handleReactToMessage(messageId, emojiData.emoji);
-        setActiveEmojiPickerId(null);
-    };
-
-    const toggleEmojiPicker = (messageId: string) => {
-        if (emojiButtonRef.current) {
-            const rect = emojiButtonRef.current.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            const spaceAbove = rect.top;
-            setEmojiPickerPosition(spaceBelow < 330 && spaceAbove > 330 ? 'top' : 'bottom');
-            setActiveEmojiPickerId((prev) => (prev === messageId ? null : messageId));
         }
     };
 
@@ -212,20 +192,19 @@ const MessageListWithItems = () => {
                                 setOptionsPosition({ x: e.clientX, y: e.clientY });
                             }}
                             onTouchStart={(e) => {
-                                const touch = e.touches[0];
-                                longPressTimeout.current = window.setTimeout(() => {
+                                const touchTimer = setTimeout(() => {
                                     setSelectedMessageId(message.id);
                                     setShowOptions(true);
+                                    const touch = e.touches[0];
                                     setOptionsPosition({ x: touch.clientX, y: touch.clientY });
-                                }, 500);
-                            }}
-                            onTouchEnd={() => {
-                                if (longPressTimeout.current !== null) {
-                                    clearTimeout(longPressTimeout.current);
-                                }
-                            }}
+                                }, 600);
 
+                                const clearTimer = () => clearTimeout(touchTimer);
+                                e.currentTarget.addEventListener('touchend', clearTimer, { once: true });
+                                e.currentTarget.addEventListener('touchmove', clearTimer, { once: true });
+                            }}
                         >
+
                             {showOptions && selectedMessageId === message.id && (
                                 <ContextEditMenu
                                     x={optionsPosition.x}
@@ -250,92 +229,69 @@ const MessageListWithItems = () => {
                                 />
                             )}
 
-                            {editingMessageId === message.id ? (
-                                <div className="inline-block max-w-[50%]">
-                                    <input
-                                        type="text"
-                                        value={editingMessageText}
-                                        onChange={(e) => setEditingMessageText(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
-                                                e.preventDefault();
-                                                handleSaveEditedMessage(message.id);
-                                            }
-                                        }}
-                                        className="w-full px-3 py-2 rounded-xs text-sm bg-gray-800 text-white border border-gray-600"
-                                    />
-                                    <div className="flex gap-3 mt-1">
-                                        <Button onClick={() => handleSaveEditedMessage(message.id)}>Save</Button>
-                                        <Button onClick={() => setEditingMessageId(null)}>Cancel</Button>
+                            <div className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-[1.025rem] ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'}`}>
+
+                                {message.content}
+
+                                {(message.messageType === 'file' || message.messageType === 'image' || message.messageType === 'video') && (
+                                    <div className={`inline-block p-4 break-words rounded-[1.025rem] ${messageClass}`}>
+                                        {checkIfImage(message.fileUrl) ? (
+                                            <div className="cursor-pointer" onClick={() => {
+                                                setShowImage(true);
+                                                setImageUrl(message.fileUrl);
+                                            }}>
+                                                <Image className='rounded-[1.025rem]' src={message.fileUrl} alt="Image" height={300} width={300} />
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-center items-center gap-3">
+                                                <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3"><MdFolderZip /></span>
+                                                <span>{message?.fileUrl?.split("/").pop() ?? 'Unknown File'}</span>
+                                                <span
+                                                    className="bg-black/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer"
+                                                    onClick={() => downloadFile(message.fileUrl)}
+                                                >
+                                                    <IoMdArrowRoundDown />
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="flex justify-between items-center mt-1">
+                                    <div className="text-xs text-gray-600 text-right">
+                                        {message.edited && <span className="italic mr-1">Edited</span>}
+                                        {moment(message.edited ? message.updatedAt : message.createdAt).format('LT')}
                                     </div>
                                 </div>
-                            ) : (
-                                <div
-                                    className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-[1.025rem] ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'
-                                        }`}
-                                >
-                                    {message.content}
 
-                                    {(message.messageType === 'file' || message.messageType === 'image' || message.messageType === 'video') && (
-                                        <div className={`inline-block p-4 break-words rounded-[1.025rem] ${messageClass}`}>
-                                            {checkIfImage(message.fileUrl) ? (
-                                                <div className="cursor-pointer" onClick={() => {
-                                                    setShowImage(true);
-                                                    setImageUrl(message.fileUrl);
-                                                }}>
-                                                    <Image className='rounded-[1.025rem]' src={message.fileUrl} alt="Image" height={300} width={300} />
-                                                </div>
-                                            ) : (
-                                                <div className="flex justify-center items-center gap-3">
-                                                    <span className="text-white/80 text-3xl bg-black/20 rounded-full p-3"><MdFolderZip /></span>
-                                                    <span>{message?.fileUrl?.split("/").pop() ?? 'Unknown File'}</span>
-                                                    <span
-                                                        className="bg-black/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer"
-                                                        onClick={() => downloadFile(message.fileUrl)}
-                                                    >
-                                                        <IoMdArrowRoundDown />
+                                <div className="relative mt-1">
+                                    <div className={`flex items-center gap-2 ${message.reactions?.length > 0 && 'justify-between'}`}>
+                                        <button
+                                            ref={emojiButtonRef}
+                                            onClick={() => toggleEmojiPicker(message.id)}
+                                            className="text-gray-500 hover:text-white"
+                                            title="React"
+                                        >
+                                            <FaRegSmile />
+                                        </button>
+                                        {message.reactions?.length > 0 && (
+                                            <div className="flex gap-1 mt-2 flex-wrap">
+                                                {message.reactions.map((reaction: any, index: any) => (
+                                                    <span key={index} className="text-xl px-2 py-0.5 bg-white/80 rounded-full">
+                                                        {reaction.type}
                                                     </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
+                                                ))}
+                                            </div>
+                                        )}
 
-                                    <div className="flex justify-between items-center mt-1">
-                                        <div className="text-xs text-gray-600 text-right">
-                                            {message.edited && <span className="italic mr-1">Edited</span>}
-                                            {moment(message.edited ? message.updatedAt : message.createdAt).format('LT')}
-                                        </div>
-                                    </div>
-
-                                    <div className="relative mt-1">
-                                        <div className={`flex items-center gap-2 ${message.reactions?.length > 0 && 'justify-between'}`}>
-                                            <button
-                                                ref={emojiButtonRef}
-                                                onClick={() => toggleEmojiPicker(message.id)}
-                                                className="text-gray-500 hover:text-white"
-                                                title="React"
-                                            >
-                                                <FaRegSmile />
-                                            </button>
-                                            {message.reactions?.length > 0 && (
-                                                <div className="flex gap-1 mt-2 flex-wrap">
-                                                    {message.reactions.map((reaction: any, index: any) => (
-                                                        <span key={index} className="text-xl px-2 py-0.5 bg-white/80 rounded-full">
-                                                            {reaction.type}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {activeEmojiPickerId === message.id && (
-                                                <div className={`absolute z-[999] ${emojiPickerPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0`}>
-                                                    <EmojiPicker onEmojiClick={(e) => handleEmojiClick(e, message.id)} height={300} width={250} />
-                                                </div>
-                                            )}
-                                        </div>
+                                        {activeEmojiPickerId === message.id && (
+                                            <div className={`absolute z-[999] ${emojiPickerPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0`}>
+                                                <EmojiPicker onEmojiClick={(e) => handleEmojiClick(e, message.id)} height={300} width={250} />
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
                     </div>
                 );

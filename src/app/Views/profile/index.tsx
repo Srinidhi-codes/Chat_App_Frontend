@@ -22,7 +22,8 @@ export default function ProfilePage() {
         firstName: '',
         lastName: '',
         image: null as string | null,
-        email: ''
+        email: '',
+        theme
     });
 
     const [selectedColor, setSelectedColor] = useState(0);
@@ -38,6 +39,7 @@ export default function ProfilePage() {
                 lastName: otherProfileData.lastName || '',
                 image: otherProfileData.image || null,
                 email: otherProfileData.email || '',
+                theme
             });
             setSelectedColor(otherProfileData.color || 0);
         } else if (userInfo) {
@@ -45,11 +47,12 @@ export default function ProfilePage() {
                 firstName: userInfo.firstName || '',
                 lastName: userInfo.lastName || '',
                 image: userInfo.image || null,
-                email: userInfo.email || ''
+                email: userInfo.email || '',
+                theme
             });
             setSelectedColor(userInfo.color || 0);
         } else {
-            fetchUserData(); // Only fetch when no userInfo is available
+            fetchUserData();
         }
     }, [isOtherProfile, otherProfileData, userInfo]);
 
@@ -124,6 +127,7 @@ export default function ProfilePage() {
                         lastName,
                         color: selectedColor,
                         image: userData.image,
+                        theme
                     },
                 },
             });

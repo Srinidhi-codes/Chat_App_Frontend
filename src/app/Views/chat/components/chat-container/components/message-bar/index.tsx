@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { GrAttachment } from 'react-icons/gr';
 import { IoSend } from 'react-icons/io5';
-import { RiEmojiStickerLine } from 'react-icons/ri';
+import { RiCloseFill, RiEmojiStickerLine } from 'react-icons/ri';
 import EmojiPicker, { EmojiClickData, Theme } from 'emoji-picker-react';
 import { useAppStore } from '@/store';
 import { useSocket } from '@/app/context/socketContext';
@@ -18,20 +18,31 @@ function MessageBar() {
     const [message, setMessage] = useState('');
     const emojiRef = useRef<HTMLDivElement | null>(null);
     const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
-    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+    const [editingMessageId1, setEditingMessageId1] = useState<string | null>(null);
     const {
         selectedChatType,
         selectedChatData,
         userInfo,
         setIsUploading,
         setFileUploadProgress,
-        theme
+        theme,
+        editingMessageId,
+        editingMessageContent,
+        setEditingMessage,
     } = useAppStore();
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL, { transports: ['websocket'] });
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [createMessage] = useMutation(CREATE_MESSAGE);
     const [updateMessage] = useMutation(UPDATE_MESSAGE);
-    const [isUploadingLocal, setIsUploadingLocal] = useState(false); // Local lock
+    const [isUploadingLocal, setIsUploadingLocal] = useState(false);
+
+    useEffect(() => {
+        if (editingMessageId) {
+            setMessage(editingMessageContent);
+            setEditingMessageId1(editingMessageId);
+        }
+    }, [editingMessageId, editingMessageContent]);
+
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -49,26 +60,26 @@ function MessageBar() {
         if (!message.trim()) return;
 
         try {
-            if (editingMessageId) {
-                // Update existing message
+            if (editingMessageId1) {
                 await updateMessage({
                     variables: {
                         input: {
-                            id: editingMessageId,
+                            id: editingMessageId1,
                             content: message,
                             edited: true,
                         },
                     },
                 });
 
-                socket?.emit('updateMessage', {
-                    id: editingMessageId,
+                socket?.emit('editMessage', {
+                    id: editingMessageId1,
                     content: message,
                     edited: true,
                 });
 
                 toast.success('Message updated');
-                setEditingMessageId(null); // Reset editing state
+                setEditingMessageId1(null);
+                setEditingMessage(null, '');
             } else {
                 // Create new message
                 if (selectedChatType === 'contact') {
@@ -79,17 +90,6 @@ function MessageBar() {
                         messageType: 'text',
                         fileUrl: undefined,
                     });
-
-                    // await createMessage({
-                    //     variables: {
-                    //         input: {
-                    //             senderId: userInfo?.id,
-                    //             recipientId: selectedChatData.id,
-                    //             content: message,
-                    //             messageType: 'text',
-                    //         },
-                    //     },
-                    // });
                 } else if (selectedChatType === 'channel') {
                     socket?.emit('sendChannelMessage', {
                         sender: userInfo?.id,
@@ -216,33 +216,19 @@ function MessageBar() {
     };
 
     const handleEditMessage = (msgId: string, currentText: string) => {
-        setEditingMessageId(msgId);
+        setEditingMessageId1(msgId);
         setMessage(currentText);
     };
 
 
     return (
-        <div className={`h-auto min-h-[10vh] ${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white border-t'} flex justify-center items-center px-4 py-2 gap-4 md:gap-6`}>
+        <div className={`sticky bottom-0 z-10 w-full h-auto min-h-[10vh] ${theme === 'dark' ? 'text-white bg-none' : 'text-black bg-white border-t'} flex justify-center items-center px-4 py-2 gap-4 md:gap-6`}>
             <div className={`w-full md:flex-1 flex ${theme === 'dark' ? 'text-white bg-[#2a2b33]' : 'text-black bg-white border'} rounded-md items-center gap-3 md:gap-5 pr-3 md:pr-5`}>
-                {editingMessageId && (
-                    <div className="text-xs text-gray-400 italic px-3 pt-2 flex justify-between items-center">
-                        <span>Editing message...</span>
-                        <button
-                            onClick={() => {
-                                setEditingMessageId(null);
-                                setMessage('');
-                            }}
-                            className="text-blue-400 underline text-xs"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                )}
                 <input
                     placeholder="Enter message here..."
                     type="text"
                     value={message}
-                    className="flex-1 p-3 md:p-5 cursor-default bg-transparent rounded-md focus:outline-none text-sm md:text-base min-w-[180px]"
+                    className="flex-1 p-3 md:p-5 cursor-default bg-transparent rounded-md focus:outline-none text-base md:text-sm min-w-[180px]"
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
@@ -289,15 +275,19 @@ function MessageBar() {
                     )}
                 </div>
             </div>
-
-            <Button
-                type="button"
-                onClick={handleSendMessage}
-                className="bg-[#8417ff] rounded-md flex justify-center items-center p-3 md:p-5 hover:bg-[#741bda] focus:bg-[#741bda] outline-none transition-all duration-300"
-            >
-                <IoSend className="text-xl md:text-2xl" />
-            </Button>
-        </div>
+            <div className='flex gap-4 items-center'>
+                {editingMessageId && <span onClick={() => { setEditingMessage(null, ''); setMessage('') }} className='bg-gray-200 p-2 rounded-full cursor-pointer' >
+                    <RiCloseFill className='text-black font-bold text-lg hover:scale-120' />
+                </span>}
+                <Button
+                    type="button"
+                    onClick={handleSendMessage}
+                    className="bg-[#8417ff] rounded-md cursor-pointer flex justify-center items-center p-3 md:p-5 hover:bg-[#741bda] focus:bg-[#741bda] outline-none transition-all duration-300"
+                >
+                    <IoSend className="text-xl md:text-2xl" />
+                </Button>
+            </div>
+        </div >
 
     );
 }
