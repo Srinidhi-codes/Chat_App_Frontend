@@ -128,28 +128,41 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
             };
 
             const handleReceiveMessage = (message: any) => {
-                const { selectedChatType, selectedChatData, addMessage, incrementUnreadCountContact } = useAppStore.getState();
+                const {
+                    selectedChatType,
+                    selectedChatData,
+                    addMessage,
+                    incrementUnreadCountContact,
+                    setLastMessage
+                } = useAppStore.getState();
 
-                // If message is for currently open contact chat, add message directly
+                const userId = useAppStore.getState().userInfo.id;
+                const otherUserId = message.sender?.id === userId ? message.recipient?.id : message.sender?.id;
+
                 if (
                     selectedChatType === "contact" &&
                     (selectedChatData?.id === message.sender?.id || selectedChatData?.id === message.recipient?.id)
                 ) {
                     addMessage(message);
                 } else {
-                    // Otherwise increment unread count for the other contact
-                    const otherUserId = message.sender?.id === useAppStore.getState().userInfo.id
-                        ? message.recipient?.id
-                        : message.sender?.id;
                     incrementUnreadCountContact(otherUserId);
                 }
 
-                // Also update contacts list
                 useAppStore.getState().addContactsInDMContacts(message);
+
+                // ✅ Update last message
+                setLastMessage(otherUserId, message);
             };
 
+
             const handleReceiveChannelMessage = (message: any) => {
-                const { selectedChatData, selectedChatType, addMessage, addChannelInChannelList, incrementUnreadCountChannel } = useAppStore.getState();
+                const {
+                    selectedChatType,
+                    selectedChatData,
+                    addMessage,
+                    incrementUnreadCountChannel,
+                    setLastMessage
+                } = useAppStore.getState();
 
                 if (selectedChatType === "channel" && selectedChatData?.id === message.channelId) {
                     addMessage(message);
@@ -157,8 +170,12 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                     incrementUnreadCountChannel(message.channelId);
                 }
 
-                addChannelInChannelList(message);
+                useAppStore.getState().addChannelInChannelList(message);
+
+                // ✅ Update last message
+                setLastMessage(message.channelId, message);
             };
+
 
 
             socket.on('receiveMessage', handleReceiveMessage);

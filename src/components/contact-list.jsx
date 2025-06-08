@@ -4,6 +4,7 @@ import { getColor } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import ContextRemoveMenu from "./ContextRemoveMenu";
 import { useSocket } from "@/app/context/socketContext";
+import moment from "moment";
 
 const ContactList = ({ isChannel }) => {
     const {
@@ -18,7 +19,8 @@ const ContactList = ({ isChannel }) => {
         removeChannel,
         selectedChatType,
         setIsChatOpen,
-        theme
+        theme,
+        lastMessages
     } = useAppStore();
     const { onlineUsers } = useSocket();
     const unreadCountsContacts = useAppStore((state) => state.unreadCountsContacts);
@@ -94,11 +96,10 @@ const ContactList = ({ isChannel }) => {
                                 e.currentTarget.addEventListener("touchend", () => clearTimeout(timer), { once: true });
                                 e.currentTarget.addEventListener("touchmove", () => clearTimeout(timer), { once: true });
                             }}
-                            className={`p-2 transition-all duration-300 cursor-pointer noselect rounded-3xl ${isSelected
-                                ? theme !== 'dark'
-                                    ? "bg-[#d9b8ff]"
-                                    : "bg-[#8417ff]"
-                                : "hover:bg-[#f1f1f111]"} `}>
+                            className={`p-2 transition-all duration-300 cursor-pointer noselect rounded-2xl border border-gray-500
+                                ${isSelected
+                                    ? 'bg-gradient-to-r from-sky-400 to-green-400'
+                                    : 'hover:bg-[#8eacd011]'}`}>
                             <div className="flex gap-3 items-center justify-start text-neutral-300 relative">
                                 {!isChannel ? (
                                     <div className="relative">
@@ -112,7 +113,7 @@ const ContactList = ({ isChannel }) => {
                                             ) : (
                                                 <div
                                                     className={`uppercase h-10 w-10 text-lg border flex items-center justify-center rounded-full ${theme === 'dark' ? 'text-white' : 'text-black'} ${isSelected
-                                                        ? "bg-[#ffffff22] border-2 border-white/50"
+                                                        ? "bg-[#ffffff22]"
                                                         : getColor(contact?.color)}`}
                                                 >
                                                     {contact?.firstName?.charAt(0) ||
@@ -130,18 +131,30 @@ const ContactList = ({ isChannel }) => {
                                         #
                                     </div>
                                 )}
-
-                                <div className="flex justify-between items-center w-full pr-4">
-                                    <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-                                        {isChannel
-                                            ? contact.name
-                                            : `${contact.firstName} ${contact.lastName}`}
-                                    </span>
-                                    {unreadCount > 0 && (
-                                        <span className="ml-2 inline-flex items-center justify-center px-1 py-0.5 text-xs font-bold leading-none text-white bg-blue-500 rounded-full">
-                                            {unreadCount}
+                                <div className="flex flex-col max-w-[80%] w-full px-2 py-1">
+                                    <div className="flex justify-between items-center">
+                                        <span className={`text-sm font-medium truncate ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                                            {isChannel ? contact.name : `${contact.firstName} ${contact.lastName}`}
                                         </span>
-                                    )}
+                                        {lastMessages[contact.id] && (
+                                            <span className={`text-xs shrink-0 ${theme === 'dark' ? 'text-white' : 'text-gray-500'}`}>
+                                                {moment(lastMessages[contact.id].updatedAt).format('LT')}
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex justify-between items-center mt-1 space-x-2">
+                                        <p className={`text-xs truncate flex-1 ${theme === 'dark' ? 'text-white' : 'text-gray-400'}`}>
+                                            {lastMessages[contact.id]?.type === "file"
+                                                ? "[File]"
+                                                : lastMessages[contact.id]?.content}
+                                        </p>
+                                        {unreadCount > 0 && (
+                                            <span className="ml-2 min-w-[20px] h-[20px] text-xs font-bold text-white bg-blue-500 rounded-full flex items-center justify-center">
+                                                {unreadCount}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 

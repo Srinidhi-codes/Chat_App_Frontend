@@ -46,6 +46,8 @@ const MessageListWithItems = () => {
     const [optionsPosition, setOptionsPosition] = useState({ x: 0, y: 0 });
 
     const scrollRef = useRef<HTMLDivElement | null>(null);
+    const prevFetchedIdRef = useRef<string | null>(null);
+
 
     const [fetchMessages, { data: fetchedMessages }] = useLazyQuery(GET_MESSAGES, {
         fetchPolicy: 'network-only',
@@ -55,12 +57,19 @@ const MessageListWithItems = () => {
     });
 
     useEffect(() => {
-        if (selectedChatType === 'contact' && selectedChatData?.id) {
-            fetchMessages({ variables: { input: { senderId: selectedChatData.id } } });
-        } else if (selectedChatType === 'channel' && selectedChatData?.id) {
-            fetchChannelMessages({ variables: { input: { channelId: selectedChatData.id } } });
+        const id = selectedChatData?.id;
+
+        if (!id || prevFetchedIdRef.current === id) return;
+
+        prevFetchedIdRef.current = id;
+
+        if (selectedChatType === 'contact') {
+            fetchMessages({ variables: { input: { senderId: id } } });
+        } else if (selectedChatType === 'channel') {
+            fetchChannelMessages({ variables: { input: { channelId: id } } });
         }
     }, [selectedChatData?.id, selectedChatType]);
+
 
     useEffect(() => {
         const handleClick = () => {
@@ -98,7 +107,6 @@ const MessageListWithItems = () => {
     };
 
     const handleRemoveMessage = (messageId: string) => {
-        console.log(messageId, "ID")
         socket.emit('deleteMessage', { id: messageId });
     };
 

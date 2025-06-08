@@ -19,9 +19,20 @@ export const createChatSlice = (set, get) => ({
     unreadCountsChannels: {},
     editingMessageId: null,
     editingMessageContent: '',
+    lastMessages: {},
+
     setEditingMessage: (id, content) => {
         set({ editingMessageId: id, editingMessageContent: content });
     },
+    setLastMessage: (chatId, message) =>
+        set((state) => ({
+            lastMessages: {
+                ...state.lastMessages,
+                [chatId]: {
+                    ...message,
+                },
+            },
+        })),
 
 
 
@@ -191,22 +202,40 @@ export const createChatSlice = (set, get) => ({
     },
 
     addMessage: (message) => {
-        set((state) => {
-            const updatedMessages = [
-                ...state.selectedChatMessages,
-                {
-                    ...message,
-                    recipient:
-                        state.selectedChatType === "channel"
-                            ? message.recipient
-                            : message.recipient.id,
-                    sender:
-                        state.selectedChatType === "channel" ? message.sender : message.sender.id,
-                },
-            ];
-            return { selectedChatMessages: updatedMessages };
-        });
+        const { selectedChatMessages, selectedChatData, selectedChatType, userInfo } = get();
+
+        const updatedMessages = [
+            ...selectedChatMessages,
+            {
+                ...message,
+                recipient:
+                    selectedChatType === "channel"
+                        ? message.recipient
+                        : message.recipient.id,
+                sender:
+                    selectedChatType === "channel"
+                        ? message.sender
+                        : message.sender.id,
+            },
+        ];
+
+        const isDM = selectedChatType === "contact";
+        const otherId = isDM
+            ? message.sender.id === userInfo.id
+                ? message.recipient.id
+                : message.sender.id
+            : message.channelId;
+
+        set((state) => ({
+            selectedChatMessages: updatedMessages,
+            lastMessages: {
+                ...state.lastMessages,
+                [otherId]: message,
+            },
+        }));
     },
+
+
     addChannelInChannelList: (message) => {
         const channels = get().channels;
         const data = channels.find((channel) => channel.id === message.channelId);

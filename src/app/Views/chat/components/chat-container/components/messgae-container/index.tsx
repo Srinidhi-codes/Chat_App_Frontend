@@ -1,20 +1,6 @@
 'use client';
-
-import React, { useEffect, useRef, useState } from 'react';
-import moment from 'moment';
-import { useLazyQuery } from '@apollo/client';
-import { GET_CHANNEL_MESSAGES, GET_MESSAGES } from '../../../../graphql/query';
 import { useAppStore } from '@/store';
-import Image from 'next/image';
-import { MdFolderZip } from 'react-icons/md';
-import { IoMdArrowRoundDown } from 'react-icons/io';
-import { IoCloseSharp } from 'react-icons/io5';
-import axios from 'axios';
-import io from 'socket.io-client';
-import { toast } from 'sonner';
 import MessageListWithItems from './components/message-list';
-
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, { transports: ['websocket'] });
 
 function MessageContainer() {
     const { theme } = useAppStore();
