@@ -16,6 +16,9 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import { toast } from 'sonner';
 import moment from 'moment';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getColor } from '@/lib/utils';
+import ImagePreview from '@/components/Image-Preview';
 
 const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, { transports: ['websocket'] });
 
@@ -177,14 +180,16 @@ const MessageListWithItems = () => {
                 const messageDate = moment(message.createdAt).format('YYYY-MM-DD');
                 const showDate = messageDate !== lastDate;
                 lastDate = messageDate;
-                const isSender = message.senderId === userInfo?.id;
+                const isSender = message?.senderId === userInfo?.id || message?.sender?.id === userInfo?.id;
 
-                const messageClass = isSender
-                    ? `${theme === 'dark' ? 'text-[#8417ff] bg-[#8417ff]/5' : 'text-black bg-[#8417ff]/5'} border-[#8417ff]/50 text-left`
-                    : `${theme === 'dark' ? 'text-white/80 bg-[#2a2b33]/5' : 'text-black bg-gray-50'} border`;
+                const messageClass = `${isSender
+                    ? 'bg-primary text-white rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl'
+                    : 'bg-gray-100 text-black rounded-tl-2xl rounded-tr-2xl rounded-br-2xl'}`
+
+
 
                 return (
-                    <div key={message.id} className={`my-1 ${isSender ? 'text-right' : 'text-left'}`}>
+                    <div ref={scrollRef} key={message.id} className={`my-1 ${isSender ? 'text-right' : 'text-left'}`}>
                         {showDate && (
                             <div className="text-center text-gray-500 my-2">
                                 {moment(message.createdAt).format('LL')}
@@ -237,7 +242,11 @@ const MessageListWithItems = () => {
                                 />
                             )}
 
-                            <div className={`relative border inline-block px-2 py-1 min-w-[10%] max-w-[50%] break-words rounded-[1.025rem] ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'}`}>
+                            <div className={`relative border border-gray-200 inline-block px-4 py-2 min-w-[10%] max-w-[70%] break-words ${isSender
+                                ? 'rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl'
+                                : 'rounded-tl-2xl rounded-tr-2xl rounded-br-2xl'
+                                } ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'}`}>
+
 
                                 {message.content}
 
@@ -301,36 +310,48 @@ const MessageListWithItems = () => {
                                 </div>
                             </div>
                         </div>
+                        <ChannelMessageSenderIndicator message={message} />
+                        <ImagePreview
+                            showImage={showImage}
+                            imageURL={imageURL}
+                            setShowImage={setShowImage}
+                            setImageUrl={setImageUrl}
+                        />
                     </div>
                 );
             })}
-            <div ref={scrollRef} />
-            {showImage && imageURL && (
-                <div className='fixed z-[1000] top-0 left-0 h-full w-full flex items-center justify-center backdrop-blur-lg'>
-                    <div>
-                        <Image src={imageURL} alt="Image View" width={300} height={300} className='h-[80vh] w-auto bg-cover rounded-xl' />
-                    </div>
-                    <div className='flex gap-5 fixed top-0 mt-5'>
-                        <button
-                            className='bg-white/10 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300'
-                            onClick={() => downloadFile(imageURL)}
-                        >
-                            <IoMdArrowRoundDown />
-                        </button>
-                        <button
-                            className='bg-white/20 p-3 text-2xl rounded-full hover:bg-black/50 cursor-pointer transition-all duration-300'
-                            onClick={() => {
-                                setShowImage(false);
-                                setImageUrl(null);
-                            }}
-                        >
-                            <IoCloseSharp />
-                        </button>
-                    </div>
-                </div>
-            )}
+
         </>
     );
 };
 
 export default MessageListWithItems;
+
+
+const ChannelMessageSenderIndicator = ({ message }: any) => {
+    const { selectedChatType, userInfo } = useAppStore();
+    return (
+        <>
+            {selectedChatType === 'channel' && message.sender.id !== userInfo.id ?
+                <div className='flex items-center justify-start gap-3'>
+                    <Avatar className="h-7 w-7 rounded-full overflow-hidden">
+                        {message?.image && (
+                            <AvatarImage
+                                src={message?.image}
+                                alt="profile"
+                                className="object-cover w-full h-full bg-black"
+                            />)}
+                        <div
+                            className={`uppercase h-7 w-7 text-sm border flex items-center justify-center rounded-full ${getColor(message?.color)}`}>
+                            {message?.firstName
+                                ? message?.sender.firstName.charAt(0)
+                                : message?.sender.email?.charAt(0)}
+                        </div>
+                    </Avatar>
+                    <span className='text-sm'>{`${message.sender.firstName} ${message.sender.lastName}`}</span>
+                </div>
+                : <></>
+            }
+        </>
+    )
+}

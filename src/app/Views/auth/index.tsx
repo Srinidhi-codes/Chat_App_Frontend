@@ -82,7 +82,7 @@ export default function AuthPage() {
                 <div className='flex items-center justify-center flex-col'>
                     <div className='flex flex-col items-center justify-center text-center pl-0 md:pl-20'>
                         <h1 className='text-2xl font-bold md:text-4xl font-serif'>
-                            Welcome to <span className='text-purple-500 text-xl md:text-3xl'>Connectify</span>
+                            Welcome to <span className='bg-gradient-to-r from-sky-500 to-green-500 bg-clip-text text-transparent text-xl md:text-3xl'>Connectify</span>
                         </h1>
                         <Image className='w-[15rem] h-[15rem]' src={'/assets/logo.png'} alt={"logo"} width={80} height={100} />
                     </div>

@@ -70,8 +70,8 @@ const EmptyChatContainer = () => {
             />
             <div className='text-opacity-80 flex flex-col justify-center items-center mt-10 lg:text-4xl text-3xl text-center'>
                 <h3 className={`${poppinsFont.className}`}>
-                    Hi<span className='text-purple-500'>!</span> Welcome to
-                    <span className='text-purple-500'> Connectify</span>.
+                    Hi<span className='bg-gradient-to-r from-sky-500 to-green-500 bg-clip-text text-transparent'>!</span> Welcome to
+                    <span className='bg-gradient-to-r from-sky-500 to-green-500 bg-clip-text text-transparent'> Connectify</span>.
                 </h3>
             </div>
         </div >

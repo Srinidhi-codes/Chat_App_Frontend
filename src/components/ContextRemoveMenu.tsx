@@ -12,7 +12,7 @@ interface ContextMenuProps {
 const ContextRemoveMenu: React.FC<ContextMenuProps> = ({ x, y, onDelete, onCancel }) => {
     return (
         <div
-            className="bg-[#2c2e3b] text-white rounded-md shadow p-2 w-[10rem] z-50 noselect"
+            className="bg-[#2c2e3b] text-white rounded-md shadow p-2 w-[130px] z-50 noselect"
             style={{
                 position: "fixed",
                 top: `${y}px`,
@@ -20,7 +20,7 @@ const ContextRemoveMenu: React.FC<ContextMenuProps> = ({ x, y, onDelete, onCance
             }}
         >
             <div
-                className="flex items-center gap-3 cursor-pointer hover:bg-white/10 hover:text-red-500 px-3 py-1"
+                className="flex items-center gap-3 cursor-pointer hover:bg-white/10 px-3 py-1"
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
                     onDelete();
@@ -29,7 +29,7 @@ const ContextRemoveMenu: React.FC<ContextMenuProps> = ({ x, y, onDelete, onCance
                 <RiDeleteBin2Fill /> Delete
             </div>
             <div
-                className="flex items-center gap-3 cursor-pointer hover:bg-white/10 hover:text-blue-500 px-3 py-1"
+                className="flex items-center gap-3 cursor-pointer hover:bg-white/10 px-3 py-1"
                 onClick={(e: React.MouseEvent<HTMLDivElement>) => {
                     e.stopPropagation();
                     onCancel();

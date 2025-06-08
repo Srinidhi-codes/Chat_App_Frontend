@@ -96,7 +96,8 @@ const ContactList = ({ isChannel }) => {
                                 e.currentTarget.addEventListener("touchend", () => clearTimeout(timer), { once: true });
                                 e.currentTarget.addEventListener("touchmove", () => clearTimeout(timer), { once: true });
                             }}
-                            className={`p-2 mb-2 transition-all duration-300 cursor-pointer noselect rounded-2xl border border-gray-500
+                            className={`py-1 px-2 mb-2 transition-all duration-300 cursor-pointer noselect rounded-xl ${theme === 'dark' ? 'shadow-[4px_4px_5px_0px_rgba(255,_255,_255,_0.15)]' : 'shadow-[4px_4px_5px_0px_rgba(0,_0,_0,_0.2)]'}
+
                                 ${isSelected
                                     ? 'bg-gradient-to-r from-sky-400 to-green-400'
                                     : 'hover:bg-[#8eacd011]'}`}>

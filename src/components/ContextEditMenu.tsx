@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaCopy, FaEdit, FaRemoveFormat } from 'react-icons/fa';
+import { FaCopy, FaEdit } from 'react-icons/fa';
 import { BiMessageSquareX } from "react-icons/bi";
 import { MdOutlineCancel } from 'react-icons/md';
 
@@ -25,38 +25,42 @@ const ContextEditMenu: React.FC<ContextMenuProps> = ({
     return (
         <div
             style={{ top: y, left: x - 90, position: 'absolute' }}
-            className="z-50 bg-[#2c2e3b] text-white text-left rounded-md shadow-md px-4 py-2 noselect"
+            className="z-50 min-w-[130px] bg-[#1e1f29] text-white/80 rounded-xl shadow-2xl px-2 py-2 backdrop-blur-sm border border-white/10"
         >
             {isUserMessage && (
-                <div
-                    className="flex items-center gap-3 hover:bg-white/10 p-2 cursor-pointer hover:text-yellow-500"
-                    onClick={onEdit}
-                >
-                    <FaEdit /> Edit
-                </div>
+                <MenuItem onClick={onEdit} color="text-xl" icon={<FaEdit />}>
+                    Edit
+                </MenuItem>
             )}
             {isUserMessage && (
-                <div
-                    className="flex items-center gap-3 hover:bg-white/10 p-2 cursor-pointer hover:text-red-500"
-                    onClick={onRemove}
-                >
-                    <BiMessageSquareX /> Delete
-                </div>
+                <MenuItem onClick={onRemove} color="text-xl" icon={<BiMessageSquareX />}>
+                    Delete
+                </MenuItem>
             )}
-            <div
-                className="flex items-center gap-3 hover:bg-white/10 p-2 cursor-pointer hover:text-blue-500"
-                onClick={onCopy}
-            >
-                <FaCopy /> Copy
-            </div>
-            <div
-                className="flex items-center gap-3 hover:bg-white/10 p-2 cursor-pointer hover:text-blue-500"
-                onClick={onCancel}
-            >
-                <MdOutlineCancel /> Cancel
-            </div>
+            <MenuItem onClick={onCopy} color="text-xl" icon={<FaCopy />}>
+                Copy
+            </MenuItem>
+            <MenuItem onClick={onCancel} color="text-xl" icon={<MdOutlineCancel />}>
+                Cancel
+            </MenuItem>
         </div>
     );
 };
+
+interface MenuItemProps {
+    onClick: () => void;
+    icon: React.ReactNode;
+    color?: string;
+    children: React.ReactNode;
+}
+
+const MenuItem: React.FC<MenuItemProps> = ({ onClick, icon, children, color = "text-white" }) => (
+    <div
+        onClick={onClick}
+        className={`flex items-center gap-3 px-4 py-2 rounded-md cursor-pointer hover:bg-white/10 hover:scale-[1.03] transition-all duration-200 ease-in-out ${color}`}
+    >
+        {icon} <span className="text-sm">{children}</span>
+    </div>
+);
 
 export default ContextEditMenu;
