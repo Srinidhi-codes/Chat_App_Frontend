@@ -183,8 +183,8 @@ const MessageListWithItems = () => {
                 const isSender = message?.senderId === userInfo?.id || message?.sender?.id === userInfo?.id;
 
                 const messageClass = `${isSender
-                    ? 'bg-primary text-white rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl'
-                    : 'bg-gray-100 text-black rounded-tl-2xl rounded-tr-2xl rounded-br-2xl'}`
+                    ? 'bg-[#82c5bca1] border border-gray-200 text-black/70 rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl'
+                    : 'bg-gray-100 border border-gray-800 text-black rounded-tl-2xl rounded-tr-2xl rounded-br-2xl'}`
 
 
 
@@ -242,7 +242,7 @@ const MessageListWithItems = () => {
                                 />
                             )}
 
-                            <div className={`relative border border-gray-200 inline-block px-4 py-2 min-w-[10%] max-w-[70%] break-words ${isSender
+                            <div className={`relative inline-block px-4 py-2 min-w-[10%] max-w-[70%] break-words ${isSender
                                 ? 'rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl'
                                 : 'rounded-tl-2xl rounded-tr-2xl rounded-br-2xl'
                                 } ${messageClass} noselect ${message.reactions?.length > 0 ? 'mb-10' : 'mb-2'}`}>
@@ -275,7 +275,7 @@ const MessageListWithItems = () => {
                                 )}
 
                                 <div className="flex justify-between items-center mt-1">
-                                    <div className="text-xs text-gray-600 text-right">
+                                    <div className="text-xs text-gray-800 text-right">
                                         {message.edited && <span className="italic mr-1">Edited</span>}
                                         {moment(message.edited ? message.updatedAt : message.createdAt).format('LT')}
                                     </div>
@@ -286,7 +286,7 @@ const MessageListWithItems = () => {
                                         <button
                                             ref={emojiButtonRef}
                                             onClick={() => toggleEmojiPicker(message.id)}
-                                            className="text-gray-500 hover:text-white"
+                                            className="text-gray-800 hover:text-white"
                                             title="React"
                                         >
                                             <FaRegSmile />
